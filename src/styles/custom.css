@@ -1,0 +1,215 @@
+/* Import Inter font if it's not already in your project */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@500;700&family=Inter:wght@500;700&display=swap');
+
+/* Target Starlight's site title container */
+:root {
+  --sl-font: 'Inter', sans-serif;
+  --sl-font: 'Inter', 'IBM Plex Sans Thai', sans-serif;
+}
+
+.site-title {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  text-decoration: none;
+  line-height: 1.1;
+}
+
+.site-title span {
+  font-family: 'Inter', sans-serif;
+  font-size: 32px !important; /* Scaled down to 32px */
+  font-weight: 700; 
+  color: var(--sl-color-white);
+  letter-spacing: -0.02em;
+}
+
+.site-title::after {
+  content: "Nexus Education OpenCourseWare";
+  font-family: 'Inter', sans-serif;
+  font-size: 18px; /* Scaled down to 18px */
+  font-weight: 500; 
+  color: var(--sl-color-gray-3); 
+  white-space: nowrap;
+}
+
+/* Language Picker */
+.language-picker select {
+  appearance: none;
+  -webkit-appearance: none;
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--sl-color-white);
+  cursor: pointer;
+  letter-spacing: 0.05em;
+}
+
+/* Ensure the container sits nicely to the left of search */
+.right-group {
+  display: flex;
+  align-items: center;
+  gap: 24px; /* Space between language picker and search */
+}
+
+/* Force the header elements into the ch.ch order */
+starlight-header {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  padding: 24px 40px; /* Generous breathing room like ch.ch */
+  border-bottom: 2px solid var(--sl-color-gray-5); /* Sharp high contrast dividing line */
+}
+
+/* Standardizing the text behavior so it looks like flat EN | TH text */
+.language-picker {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+/* Injecting the custom visual "|" separator line after the switcher */
+.language-picker::after {
+  content: "|";
+  margin-left: 12px;
+  color: var(--sl-color-gray-4);
+  font-weight: 300;
+  pointer-events: none;
+}
+
+/* --- HOMEPAGE SPLIT LAYOUT --- */
+.homepage-split-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* Exact 50/50 split */
+  gap: 40px;
+  max-width: 1200px;
+  margin: 60px auto 0 auto;
+  padding: 0 40px;
+}
+
+/* Heading style */
+.select-heading {
+  font-family: 'Inter', sans-serif;
+  text-transform: lowercase; /* Matches your exact "select your preferred course" input */
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--sl-color-gray-3);
+  margin-bottom: 16px;
+}
+
+/* Scroll Box Container */
+.discipline-scroll-box {
+  max-height: 400px; /* Constrains height to force a scrolling action */
+  overflow-y: auto;
+  padding-right: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 0; /* Flat stacked border look */
+}
+
+/* Individual Discipline Item Rows */
+.discipline-link {
+  font-family: 'Inter', sans-serif;
+  font-size: 20px;
+  font-weight: 500;
+  color: var(--sl-color-white);
+  text-decoration: none;
+  padding: 18px 0;
+  border-bottom: 1px solid var(--sl-color-gray-5); /* Clean horizontal separator lines */
+  transition: color 0.2s ease;
+}
+
+.discipline-link:hover {
+  color: #A865B5; /* Subtle hint of your brand scroll color on hover */
+}
+
+/* --- CUSTOM PURPLE SCROLLBAR ENGINE --- */
+.discipline-scroll-box::-webkit-scrollbar {
+  width: 6px; /* Sleek, minimal width */
+}
+
+.discipline-scroll-box::-webkit-scrollbar-track {
+  background: transparent; /* Seamless blend into the existing page background color */
+}
+
+.discipline-scroll-box::-webkit-scrollbar-thumb {
+  background-color: #A865B5; /* Your requested track color */
+  border-radius: 3px;
+}
+
+.right-half.brand-card {
+  background-color: #A865B5; /* Matching branding purple accent color */
+  border-radius: 8px; /* Sharp clean card finish */
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between; /* Spaces main info and credits elegantly */
+  min-height: 400px; /* Aligns height perfectly with our scroll area */
+}
+
+/* Typography styles inside the purple card */
+.brand-domain {
+  font-size: 24px;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0 0 12px 0 !important;
+}
+
+.brand-tagline {
+  font-size: 18px;
+  font-weight: 500;
+  color: #ffffff;
+  margin: 0 0 6px 0 !important;
+  opacity: 0.95;
+}
+
+.brand-subtext {
+  font-size: 15px;
+  font-weight: 400;
+  color: #ffffff;
+  margin: 0 !important;
+  opacity: 0.85;
+}
+
+/* Credits styling layout */
+.brand-credits {
+  border-top: 1px solid rgba(255, 255, 255, 0.3); /* Soft break line */
+  padding-top: 24px;
+}
+
+.credits-heading {
+  font-size: 14px;
+  text-transform: lowercase;
+  color: #ffffff;
+  opacity: 0.75;
+  margin: 0 0 8px 0 !important;
+}
+
+.credits-links {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.credits-links a {
+  font-size: 16px;
+  font-weight: 600;
+  color: #ffffff !important;
+  text-decoration: underline !important;
+  text-underline-offset: 4px;
+  transition: opacity 0.2s ease;
+}
+
+.credits-links a:hover {
+  opacity: 0.8;
+}
+
+.credit-separator {
+  color: #ffffff;
+  opacity: 0.75;
+}
