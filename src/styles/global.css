@@ -11,3 +11,25 @@
   border-bottom: none !important;
   display: block !important;
 }
+/* 1. Target Starlight's main page container grid */
+.main-frame, 
+.homepage-hero-wrapper, 
+.homepage-split-container {
+  /* Attach a standard CSS animation to the layout boxes */
+  animation: pageFadeIn 1s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  
+  /* Keep the box hidden initially so it doesn't flash before animating */
+  opacity: 0; 
+}
+
+/* 2. Define the exact path of the animation fade */
+@keyframes pageFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px); /* Adds a subtle, elegant upward lift */
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

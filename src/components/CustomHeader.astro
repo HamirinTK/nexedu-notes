@@ -1,19 +1,19 @@
 ---
 /* src/components/CustomHeader.astro */
 import { Icon } from '@astrojs/starlight/components';
+// 1. IMPORT STARLIGHT'S OFFICIAL ENGINE COMPONENT
+import Search from '@astrojs/starlight/components/Search.astro';
 ---
 
 <header class="custom-header">
-  <!-- Left Side: Brand Identity -->
   <a href="/" class="header-left">
     <img src="/logo.png" alt="NEXEDU Logo" class="header-logo" />
     <div class="header-titles">
       <span class="brand-title">NEXEDU</span>
-      <span class="site-title-after">Nexus Education OpenCourseWare</span>
+      <span class="site-title-after">OpenCourseWare</span>
     </div>
   </a>
 
-  <!-- Center: Live Dynamic Clock Engine -->
   <div class="header-center">
     <div class="clock-wrapper">
       <span id="digital-clock">00:00:00</span>
@@ -21,20 +21,17 @@ import { Icon } from '@astrojs/starlight/components';
     </div>
   </div>
 
-  <!-- Right Side: Navigation Utility Tools -->
   <div class="header-right">
-    <!-- Search Action Trigger Button -->
-    <button id="search-trigger-btn" class="icon-action-btn" aria-label="Search" title="Search (Ctrl+K)">
-      <Icon name="magnifier" size="1.5rem" />
-    </button>
+    
+    <div id="native-search-container" class="starlight-search-wrapper">
+      <Search />
+    </div>
 
-    <!-- Settings Menu Toggler Container -->
     <div class="settings-menu-container">
       <button id="settings-trigger-btn" class="icon-action-btn" aria-label="Settings" title="Settings">
         <Icon name="setting" size="1.5rem" />
       </button>
 
-      <!-- Settings Interactive Dropdown Panel -->
       <div id="settings-dropdown" class="settings-dropdown-panel">
         <div class="settings-row">
           <label>
@@ -45,6 +42,7 @@ import { Icon } from '@astrojs/starlight/components';
             <option value="th">ไทย</option>
           </select>
         </div>
+
         <div class="settings-row">
           <label>
             <Icon name="sun" size="1rem" /> Theme
@@ -79,70 +77,103 @@ import { Icon } from '@astrojs/starlight/components';
     if (initialized) return;
     initialized = true;
 
-    // Elements
+    // --- 1. ELEMENT SELECTION ---
     const settingsBtn = document.getElementById("settings-trigger-btn");
     const settingsMenu = document.getElementById("settings-dropdown");
     const searchBtn = document.getElementById("search-trigger-btn");
     const searchBar = document.getElementById("search-container-wrapper");
     const searchInput = document.getElementById("search-input-overlay");
-
-    // Clock
     const clock = document.getElementById("digital-clock");
     const timezone = document.getElementById("clock-timezone");
 
+    // Our new assignment selectors
+    const uiLangSelect = document.getElementById("ui-lang-select") as HTMLSelectElement;
+    const themeSelect = document.getElementById("theme-select") as HTMLSelectElement;
+
+    // --- 2. THE LIVE CLOCK ENGINE ---
     function updateClock() {
       if (!clock || !timezone) return;
-
       const now = new Date();
-
-      clock.textContent = now.toLocaleTimeString([], {
-        hour12: false,
-      });
-
+      clock.textContent = now.toLocaleTimeString([], { hour12: false });
       const offset = -now.getTimezoneOffset();
       const sign = offset >= 0 ? "+" : "-";
       const h = String(Math.floor(Math.abs(offset) / 60)).padStart(2, "0");
       const m = String(Math.abs(offset) % 60).padStart(2, "0");
-
       timezone.textContent = `UTC${sign}${h}:${m}`;
     }
-
     updateClock();
     setInterval(updateClock, 1000);
 
-    // Opens Starlight search
-    function openSearchModal() {
-      const button = document.querySelector(
-        "button[data-open-modal]"
-      );
+    // --- 3. THE LANGUAGE ROUTING MACHINE ---
+    // Set the initial dropdown state based on the current page path
+    if (uiLangSelect) {
+      const isThai = window.location.pathname.startsWith('/th/') || window.location.pathname === '/th';
+      uiLangSelect.value = isThai ? "th" : "en";
 
-      if (button instanceof HTMLButtonElement) {
-        button.click();
-      }
+      uiLangSelect.addEventListener("change", () => {
+        const targetLang = uiLangSelect.value;
+        const currentPath = window.location.pathname;
+
+        if (targetLang === "th") {
+          // If switching to Thai and not already there, prepend /th
+          if (!currentPath.startsWith('/th/')) {
+            window.location.href = '/th' + currentPath;
+          }
+        } else {
+          // If switching to English, strip out the /th prefix safely
+          if (currentPath.startsWith('/th/')) {
+            window.location.href = currentPath.replace('/th/', '/');
+          } else if (currentPath === '/th' || currentPath === '/th/') {
+            window.location.href = '/';
+          }
+        }
+      });
     }
 
-    // Close all menus
+    // --- 4. THE THEME/MODE SWITCHER ENGINE ---
+    // Read Starlight's theme state when the page loads
+    if (themeSelect) {
+      const currentStoredTheme = localStorage.getItem('starlight-theme');
+      // If nothing is stored, default to 'system'
+      themeSelect.value = currentStoredTheme || 'system';
+
+      themeSelect.addEventListener("change", () => {
+        const selectedTheme = themeSelect.value;
+        
+        // Starlight responds to data-theme on the <html> tag
+        if (selectedTheme === 'system') {
+          localStorage.removeItem('starlight-theme');
+          // Check system preference
+          const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          document.documentElement.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
+        } else {
+          localStorage.setItem('starlight-theme', selectedTheme);
+          document.documentElement.setAttribute('data-theme', selectedTheme);
+        }
+      });
+    }
+
+    // --- 5. SEARCH & INTERACTION DROPDOWNS ---
+    function openSearchModal() {
+      const button = document.querySelector("button[data-open-modal]");
+      if (button instanceof HTMLButtonElement) button.click();
+    }
+
     function closeMenus() {
       settingsMenu?.classList.remove("is-active");
       searchBar?.classList.remove("is-active");
     }
 
-    // Settings
     settingsBtn?.addEventListener("click", (e) => {
       e.stopPropagation();
-
       settingsMenu?.classList.toggle("is-active");
       searchBar?.classList.remove("is-active");
     });
 
-    // Search
     searchBtn?.addEventListener("click", (e) => {
       e.stopPropagation();
-
       const opened = searchBar?.classList.toggle("is-active");
-
       settingsMenu?.classList.remove("is-active");
-
       if (opened) {
         requestAnimationFrame(() => {
           searchInput?.focus();
@@ -153,28 +184,25 @@ import { Icon } from '@astrojs/starlight/components';
 
     searchInput?.addEventListener("click", openSearchModal);
 
-    // Ctrl/Cmd + K
     document.addEventListener("keydown", (e) => {
       if (!(e.ctrlKey || e.metaKey) || e.key.toLowerCase() !== "k") return;
-
       e.preventDefault();
-
       if (!searchBar?.classList.contains("is-active")) {
         searchBar?.classList.add("is-active");
       }
-
       settingsMenu?.classList.remove("is-active");
-
       requestAnimationFrame(openSearchModal);
     });
 
-    // Outside click
     document.addEventListener("click", closeMenus);
-
     settingsMenu?.addEventListener("click", (e) => e.stopPropagation());
     searchBar?.addEventListener("click", (e) => e.stopPropagation());
   }
 
+  // Execute on initial run and whenever Starlight loads a new page via transitions
   initHeader();
-  document.addEventListener("astro:page-load", initHeader);
+  document.addEventListener("astro:page-load", () => {
+    initialized = false; // Reset toggle so it runs on fresh virtual pages
+    initHeader();
+  });
 </script>

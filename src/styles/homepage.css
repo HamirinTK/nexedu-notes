@@ -3,13 +3,37 @@
 /* --- HOMEPAGE SPLIT LAYOUT --- */
 .homepage-split-container {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  /*Mobile default layout: Single column */
+  grid-template-columns: 1fr; 
   gap: 40px;
   max-width: 1200px;
-  margin: 60px auto 0 auto;
-  padding: 0 40px;
+  margin: 40px auto 0 auto;
+  padding: 0 20px;
 }
 
+/*Responsive Breakpoint: Desktop Screens (widths above 900px) */
+@media (min-width: 900px) {
+  .homepage-split-container {
+    /* Side-by-side 50/50 split layout for desktops */
+    grid-template-columns: 1fr 1fr; 
+    margin: 60px auto 0 auto;
+    padding: 0 40px;
+  }
+}
+
+/* Mobile Ordering Engine */
+@media (max-width: 899px) {
+  .left-half {
+    /* Tells the course selector links list to drop to position #2 */
+    order: 2; 
+  }
+  .right-half.brand-card {
+    /* Tells the purple brand card box to jump up to position #1 */
+    order: 1; 
+    min-height: auto; /* Allow box height to collapse naturally on narrow displays */
+    margin-bottom: 20px;
+  }
+}
 .select-heading {
   text-transform: lowercase;
   font-size: 18px;
