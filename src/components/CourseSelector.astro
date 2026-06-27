@@ -1,5 +1,4 @@
 ---
-/* src/components/CourseSelector.astro */
 interface Course {
   name: string;
   url: string;
@@ -12,14 +11,31 @@ interface Props {
   tagline: string;
   subtext: string;
   creditsHeading: string;
+  creditsHeading2: string;
+  creditsHeading3: string;
 }
 
-const { heading, courses, domain, tagline, subtext, creditsHeading } = Astro.props;
+const {
+  heading,
+  courses,
+  domain,
+  tagline,
+  subtext,
+  creditsHeading,
+  creditsHeading2,
+  creditsHeading3,
+} = Astro.props;
+
+const link2Text = "N-N-N";
+const link2Url = "https://n-n-n-website.onrender.com/";
+
+const link3Text = "GitHub";
+const link3Url = "https://github.com/HamirinTK/nexedu-notes";
 ---
 
 <div class="homepage-split-container">
   
-  {/* LEFT HALF: CONTENT & DISCIPLINES */}
+  <!-- LEFT HALF -->
   <div class="left-half">
     <p class="select-heading">{heading}</p>
     
@@ -28,9 +44,12 @@ const { heading, courses, domain, tagline, subtext, creditsHeading } = Astro.pro
         <a href={course.url} class="discipline-link">{course.name}</a>
       ))}
     </div>
+
+    <!-- End line -->
+    <hr class="course-list-end-line" />
   </div>
 
-  {/* RIGHT HALF: PURPLE BRAND CARD */}
+  <!-- RIGHT HALF -->
   <div class="right-half brand-card">
     <div class="brand-main-info">
       <p class="brand-domain">{domain}</p>
@@ -39,13 +58,35 @@ const { heading, courses, domain, tagline, subtext, creditsHeading } = Astro.pro
     </div>
     
     <div class="brand-credits">
+      <!-- First credit row -->
       <p class="credits-heading">{creditsHeading}</p>
       <div class="credits-links">
         <a href="https://github.com/HamirinTK" target="_blank" rel="noopener noreferrer">HamirinTK</a>
         <span class="credit-separator">&</span>
         <a href="https://github.com/Mar13554" target="_blank" rel="noopener noreferrer">Mar13554</a>
       </div>
+
+      <!-- Second credit row (new) -->
+      <p class="credits-heading">{creditsHeading2}</p>
+      <div class="credits-links">
+        <a href={link2Url} target="_blank" rel="noopener noreferrer">{link2Text}</a>
+      </div>
+
+      <!-- Third credit row (new) -->
+      <p class="credits-heading">{creditsHeading3}</p>
+      <div class="credits-links">
+        <a href={link3Url} target="_blank" rel="noopener noreferrer">{link3Text}</a>
+      </div>
     </div>
   </div>
 
 </div>
+
+<style>
+  .course-list-end-line {
+    margin: 24px 0 0 0;
+    border: 0;
+    border-top: 2px solid var(--sl-color-gray-5);
+    opacity: 0.6;
+  }
+</style>

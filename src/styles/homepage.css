@@ -112,19 +112,27 @@
 }
 
 /* Credits */
+/* --- CREDITS (inside purple card) --- */
 .brand-credits {
   border-top: 1px solid rgba(255, 255, 255, 0.3);
-  padding-top: 24px;
+  padding-top: 16px; /* was 24px – reduced */
 }
 
+/* All credit headings */
 .credits-heading {
   font-size: 14px;
   text-transform: lowercase;
   color: #ffffff;
   opacity: 0.75;
-  margin: 0 0 8px 0 !important;
+  margin: 0 0 4px 0 !important; /* bottom margin reduced from 8px to 4px */
 }
 
+/* Add top spacing between credit rows (except the first) */
+.credits-heading:not(:first-of-type) {
+  margin-top: 14px !important; /* controls gap between rows */
+}
+
+/* Keep the links layout unchanged */
 .credits-links {
   display: flex;
   gap: 8px;
@@ -225,4 +233,11 @@
   border-color: #A865B5;
   color: #A865B5 !important;
   box-shadow: 0 0 16px rgba(168, 101, 181, 0.2);
+}
+
+.course-list-end-line {
+  margin: 24px 0 0 0;
+  border: 0;
+  border-top: 2px solid var(--sl-color-gray-5);
+  opacity: 0.6;
 }

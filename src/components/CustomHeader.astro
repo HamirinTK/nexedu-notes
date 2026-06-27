@@ -104,31 +104,48 @@ import Search from '@astrojs/starlight/components/Search.astro';
     updateClock();
     setInterval(updateClock, 1000);
 
-    // --- 3. THE LANGUAGE ROUTING MACHINE ---
-    // Set the initial dropdown state based on the current page path
-    if (uiLangSelect) {
-      const isThai = window.location.pathname.startsWith('/th/') || window.location.pathname === '/th';
-      uiLangSelect.value = isThai ? "th" : "en";
-
-      uiLangSelect.addEventListener("change", () => {
-        const targetLang = uiLangSelect.value;
-        const currentPath = window.location.pathname;
-
-        if (targetLang === "th") {
-          // If switching to Thai and not already there, prepend /th
-          if (!currentPath.startsWith('/th/')) {
-            window.location.href = '/th' + currentPath;
-          }
-        } else {
-          // If switching to English, strip out the /th prefix safely
-          if (currentPath.startsWith('/th/')) {
-            window.location.href = currentPath.replace('/th/', '/');
-          } else if (currentPath === '/th' || currentPath === '/th/') {
-            window.location.href = '/';
-          }
-        }
-      });
+// --- 3. THE LANGUAGE ROUTING MACHINE (FIXED) ---
+if (uiLangSelect) {
+  // Helper: detect current language from URL
+  function getCurrentLang() {
+    const segments = window.location.pathname.split('/').filter(s => s.length > 0);
+    if (segments.length > 0 && (segments[0] === 'th' || segments[0] === 'en')) {
+      return segments[0];
     }
+    return 'en'; // fallback default
+  }
+
+  // Set initial value
+  uiLangSelect.value = getCurrentLang();
+
+  uiLangSelect.addEventListener('change', function () {
+    const targetLang = this.value; // 'th' or 'en'
+    const currentPath = window.location.pathname;
+
+    // Split into segments
+    let segments = currentPath.split('/').filter(s => s.length > 0);
+    let currentLang = null;
+
+    // Check if the first segment is a language code
+    if (segments.length > 0 && (segments[0] === 'th' || segments[0] === 'en')) {
+      currentLang = segments[0];
+      segments.shift(); // remove it
+    }
+
+    // If no language prefix, treat as 'en' (default)
+    if (!currentLang) currentLang = 'en';
+
+    // If already on the target language, do nothing
+    if (currentLang === targetLang) return;
+
+    // Prepend the new language
+    segments.unshift(targetLang);
+
+    // Build the new URL
+    const newPath = '/' + segments.join('/');
+    window.location.href = newPath;
+  });
+}
 
     // --- 4. THE THEME/MODE SWITCHER ENGINE ---
     // Read Starlight's theme state when the page loads

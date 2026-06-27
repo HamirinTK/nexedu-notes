@@ -1,8 +1,31 @@
 /* Import Inter and IBM Plex Sans Thai */
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght=500;700&family=Inter:wght@500;700&display=swap');
-
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&display=swap');
+/* 2. Global Defaults (Fallback & Default English styling) */
 :root {
-  --sl-font: 'Inter', 'IBM Plex Sans Thai', sans-serif;
+  --font-en: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-th: 'IBM Plex Sans Thai', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+
+  /* Default font across the platform */
+  --sl-font: var(--font-en);
+}
+
+/* 3. CONDITIONAL OVERRIDE: If document root language is Thai ('th') */
+:root:lang(th) {
+  --sl-font: var(--font-th) !important;
+}
+
+/* Apply to all text blocks safely across headings and body containers */
+body {
+  font-family: var(--sl-font);
+}
+
+:lang(th) h1, :lang(th) h2, :lang(th) h3, :lang(th) h4, :lang(th) h5, :lang(th) h6, :lang(th) p, :lang(th) span, :lang(th) a {
+  font-family: var(--font-th) !important;
+}
+
+:lang(en) h1, :lang(en) h2, :lang(en) h3, :lang(en) h4, :lang(en) h5, :lang(en) h6, :lang(en) p, :lang(en) span, :lang(en) a {
+  font-family: var(--font-en) !important;
 }
 
 /* Hide ONLY the native default elements, NOT the main container wrapper */
