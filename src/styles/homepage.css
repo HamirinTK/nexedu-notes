@@ -1,0 +1,204 @@
+/* src/styles/homepage.css */
+
+/* --- HOMEPAGE SPLIT LAYOUT --- */
+.homepage-split-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  max-width: 1200px;
+  margin: 60px auto 0 auto;
+  padding: 0 40px;
+}
+
+.select-heading {
+  text-transform: lowercase;
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--sl-color-gray-3);
+  margin-bottom: 16px;
+}
+
+/* Scroll Box & Items */
+.discipline-scroll-box {
+  max-height: 400px;
+  overflow-y: auto;
+  padding-right: 16px;
+  display: flex;
+  flex-direction: column;
+}
+
+.discipline-link {
+  font-size: 20px;
+  font-weight: 500;
+  color: var(--sl-color-white);
+  text-decoration: none;
+  padding: 18px 0;
+  border-bottom: 1px solid var(--sl-color-gray-5);
+  transition: color 0.2s ease;
+}
+
+.discipline-link:hover {
+  color: #A865B5;
+}
+
+/* Custom Purple Scrollbar */
+.discipline-scroll-box::-webkit-scrollbar {
+  width: 6px;
+}
+.discipline-scroll-box::-webkit-scrollbar-track {
+  background: transparent;
+}
+.discipline-scroll-box::-webkit-scrollbar-thumb {
+  background-color: #A865B5;
+  border-radius: 3px;
+}
+
+/* Brand Card (Right Half) */
+.right-half.brand-card {
+  background-color: #A865B5;
+  border-radius: 8px;
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 400px;
+}
+
+.brand-domain {
+  font-size: 24px;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0 0 12px 0 !important;
+}
+
+.brand-tagline {
+  font-size: 18px;
+  font-weight: 500;
+  color: #ffffff;
+  margin: 0 0 6px 0 !important;
+  opacity: 0.95;
+}
+
+.brand-subtext {
+  font-size: 15px;
+  font-weight: 400;
+  color: #ffffff;
+  margin: 0 !important;
+  opacity: 0.85;
+}
+
+/* Credits */
+.brand-credits {
+  border-top: 1px solid rgba(255, 255, 255, 0.3);
+  padding-top: 24px;
+}
+
+.credits-heading {
+  font-size: 14px;
+  text-transform: lowercase;
+  color: #ffffff;
+  opacity: 0.75;
+  margin: 0 0 8px 0 !important;
+}
+
+.credits-links {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.credits-links a {
+  font-size: 16px;
+  font-weight: 600;
+  color: #ffffff !important;
+  text-decoration: underline !important;
+  text-underline-offset: 4px;
+  transition: opacity 0.2s ease;
+}
+
+.credits-links a:hover {
+  opacity: 0.8;
+}
+
+.credit-separator {
+  color: #ffffff;
+  opacity: 0.75;
+}
+
+/* --- HOMEPAGE HERO / LANG SELECTOR --- */
+.homepage-hero-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  text-align: center;
+  gap: 32px;
+  margin-top: 40px;
+}
+
+.homepage-logo-container {
+  max-width: 180px;
+  width: 100%;
+}
+
+.homepage-logo {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  filter: drop-shadow(0px 4px 12px rgba(0,0,0,0.1)); 
+}
+
+.homepage-brand-header {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.brand-main-title {
+  font-size: 42px !important;
+  font-weight: 700;
+  color: var(--sl-color-white);
+  letter-spacing: -0.02em;
+  margin: 0 !important;
+  line-height: 1.1;
+}
+
+.brand-ipa-sub {
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--sl-color-gray-3);
+  margin: 0 !important;
+  letter-spacing: 0.05em;
+}
+
+.homepage-lang-symbol .lang-icon {
+  color: var(--sl-color-gray-3);
+  margin-top: 8px;
+}
+
+.homepage-lang-selector {
+  display: flex;
+  gap: 24px;
+  justify-content: center;
+  align-items: center;
+}
+
+.lang-btn {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--sl-color-white) !important;
+  text-decoration: none !important;
+  padding: 14px 44px;
+  border: 2px solid var(--sl-color-gray-4);
+  border-radius: 8px;
+  min-width: 160px;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.lang-btn:hover {
+  background-color: rgba(168, 101, 181, 0.15);
+  border-color: #A865B5;
+  color: #A865B5 !important;
+  box-shadow: 0 0 16px rgba(168, 101, 181, 0.2);
+}

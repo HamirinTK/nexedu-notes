@@ -1,0 +1,13 @@
+/* Import Inter and IBM Plex Sans Thai */
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght=500;700&family=Inter:wght@500;700&display=swap');
+
+:root {
+  --sl-font: 'Inter', 'IBM Plex Sans Thai', sans-serif;
+}
+
+/* Hide ONLY the native default elements, NOT the main container wrapper */
+.header {
+  padding: 0 !important;
+  border-bottom: none !important;
+  display: block !important;
+}

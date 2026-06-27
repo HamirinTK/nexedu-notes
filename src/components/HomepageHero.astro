@@ -1,0 +1,30 @@
+---
+/* src/components/HomepageHero.astro */
+import { Icon } from '@astrojs/starlight/components';
+---
+
+<div class="homepage-hero-wrapper">
+  
+  {/* 1. Brand Logo Block */}
+  <div class="homepage-logo-container">
+    <img src="/logo.png" alt="NEXEDU Logo" class="homepage-logo" />
+  </div>
+
+  {/* 2. Typography Block */}
+  <div class="homepage-brand-header">
+    <h1 class="brand-main-title">NEXEDU</h1>
+    <p class="brand-ipa-sub">/'ne.kseː.duː/</p>
+  </div>
+
+  {/* 3. Global Language Symbol */}
+  <div class="homepage-lang-symbol">
+    <Icon name="translate" size="2.5rem" class="lang-icon" />
+  </div>
+
+  {/* 4. Navigation Buttons */}
+  <div class="homepage-lang-selector">
+    <a href="/th/" class="lang-btn">ไทย</a>
+    <a href="/en/" class="lang-btn">English</a>
+  </div>
+
+</div>

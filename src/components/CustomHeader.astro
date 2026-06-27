@@ -1,0 +1,180 @@
+---
+/* src/components/CustomHeader.astro */
+import { Icon } from '@astrojs/starlight/components';
+---
+
+<header class="custom-header">
+  <!-- Left Side: Brand Identity -->
+  <a href="/" class="header-left">
+    <img src="/logo.png" alt="NEXEDU Logo" class="header-logo" />
+    <div class="header-titles">
+      <span class="brand-title">NEXEDU</span>
+      <span class="site-title-after">Nexus Education OpenCourseWare</span>
+    </div>
+  </a>
+
+  <!-- Center: Live Dynamic Clock Engine -->
+  <div class="header-center">
+    <div class="clock-wrapper">
+      <span id="digital-clock">00:00:00</span>
+      <span id="clock-timezone">UTC+00:00</span>
+    </div>
+  </div>
+
+  <!-- Right Side: Navigation Utility Tools -->
+  <div class="header-right">
+    <!-- Search Action Trigger Button -->
+    <button id="search-trigger-btn" class="icon-action-btn" aria-label="Search" title="Search (Ctrl+K)">
+      <Icon name="magnifier" size="1.5rem" />
+    </button>
+
+    <!-- Settings Menu Toggler Container -->
+    <div class="settings-menu-container">
+      <button id="settings-trigger-btn" class="icon-action-btn" aria-label="Settings" title="Settings">
+        <Icon name="setting" size="1.5rem" />
+      </button>
+
+      <!-- Settings Interactive Dropdown Panel -->
+      <div id="settings-dropdown" class="settings-dropdown-panel">
+        <div class="settings-row">
+          <label>
+            <Icon name="translate" size="1rem" /> UI Language
+          </label>
+          <select id="ui-lang-select">
+            <option value="en">English</option>
+            <option value="th">ไทย</option>
+          </select>
+        </div>
+        <div class="settings-row">
+          <label>
+            <Icon name="sun" size="1rem" /> Theme
+          </label>
+          <select id="theme-select">
+            <option value="dark">Dark</option>
+            <option value="light">Light</option>
+            <option value="system">System</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- Search Overlay Interface Box -->
+<div id="search-container-wrapper" class="search-overlay-wrapper">
+  <div class="search-input-wrapper">
+    <input 
+      type="text" 
+      id="search-input-overlay" 
+      placeholder="Search documentation... (Press Ctrl+K)" 
+      readonly
+    />
+  </div>
+</div>
+
+<script>
+  let initialized = false;
+
+  function initHeader() {
+    if (initialized) return;
+    initialized = true;
+
+    // Elements
+    const settingsBtn = document.getElementById("settings-trigger-btn");
+    const settingsMenu = document.getElementById("settings-dropdown");
+    const searchBtn = document.getElementById("search-trigger-btn");
+    const searchBar = document.getElementById("search-container-wrapper");
+    const searchInput = document.getElementById("search-input-overlay");
+
+    // Clock
+    const clock = document.getElementById("digital-clock");
+    const timezone = document.getElementById("clock-timezone");
+
+    function updateClock() {
+      if (!clock || !timezone) return;
+
+      const now = new Date();
+
+      clock.textContent = now.toLocaleTimeString([], {
+        hour12: false,
+      });
+
+      const offset = -now.getTimezoneOffset();
+      const sign = offset >= 0 ? "+" : "-";
+      const h = String(Math.floor(Math.abs(offset) / 60)).padStart(2, "0");
+      const m = String(Math.abs(offset) % 60).padStart(2, "0");
+
+      timezone.textContent = `UTC${sign}${h}:${m}`;
+    }
+
+    updateClock();
+    setInterval(updateClock, 1000);
+
+    // Opens Starlight search
+    function openSearchModal() {
+      const button = document.querySelector(
+        "button[data-open-modal]"
+      );
+
+      if (button instanceof HTMLButtonElement) {
+        button.click();
+      }
+    }
+
+    // Close all menus
+    function closeMenus() {
+      settingsMenu?.classList.remove("is-active");
+      searchBar?.classList.remove("is-active");
+    }
+
+    // Settings
+    settingsBtn?.addEventListener("click", (e) => {
+      e.stopPropagation();
+
+      settingsMenu?.classList.toggle("is-active");
+      searchBar?.classList.remove("is-active");
+    });
+
+    // Search
+    searchBtn?.addEventListener("click", (e) => {
+      e.stopPropagation();
+
+      const opened = searchBar?.classList.toggle("is-active");
+
+      settingsMenu?.classList.remove("is-active");
+
+      if (opened) {
+        requestAnimationFrame(() => {
+          searchInput?.focus();
+          openSearchModal();
+        });
+      }
+    });
+
+    searchInput?.addEventListener("click", openSearchModal);
+
+    // Ctrl/Cmd + K
+    document.addEventListener("keydown", (e) => {
+      if (!(e.ctrlKey || e.metaKey) || e.key.toLowerCase() !== "k") return;
+
+      e.preventDefault();
+
+      if (!searchBar?.classList.contains("is-active")) {
+        searchBar?.classList.add("is-active");
+      }
+
+      settingsMenu?.classList.remove("is-active");
+
+      requestAnimationFrame(openSearchModal);
+    });
+
+    // Outside click
+    document.addEventListener("click", closeMenus);
+
+    settingsMenu?.addEventListener("click", (e) => e.stopPropagation());
+    searchBar?.addEventListener("click", (e) => e.stopPropagation());
+  }
+
+  initHeader();
+  document.addEventListener("astro:page-load", initHeader);
+</script>

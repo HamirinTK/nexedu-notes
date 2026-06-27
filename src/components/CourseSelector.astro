@@ -1,0 +1,51 @@
+---
+/* src/components/CourseSelector.astro */
+interface Course {
+  name: string;
+  url: string;
+}
+
+interface Props {
+  heading: string;
+  courses: Course[];
+  domain: string;
+  tagline: string;
+  subtext: string;
+  creditsHeading: string;
+}
+
+const { heading, courses, domain, tagline, subtext, creditsHeading } = Astro.props;
+---
+
+<div class="homepage-split-container">
+  
+  {/* LEFT HALF: CONTENT & DISCIPLINES */}
+  <div class="left-half">
+    <p class="select-heading">{heading}</p>
+    
+    <div class="discipline-scroll-box">
+      {courses.map((course) => (
+        <a href={course.url} class="discipline-link">{course.name}</a>
+      ))}
+    </div>
+  </div>
+
+  {/* RIGHT HALF: PURPLE BRAND CARD */}
+  <div class="right-half brand-card">
+    <div class="brand-main-info">
+      <p class="brand-domain">{domain}</p>
+      <p class="brand-tagline">{tagline}</p>
+      <p class="brand-subtext">{subtext}</p>
+    </div>
+    
+    <div class="brand-credits">
+      <p class="credits-heading">{creditsHeading}</p>
+      <div class="credits-links">
+        <a href="https://github.com/HamirinTK" target="_blank" rel="noopener noreferrer">HamirinTK</a>
+        <span class="credit-separator">&</span>
+        <a href="https://github.com/Mar13554" target="_blank" rel="noopener noreferrer">Mar13554</a>
+      </div>
+    </div>
+  </div>
+
+</div>

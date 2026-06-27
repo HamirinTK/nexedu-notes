@@ -1,50 +1,30 @@
 ---
-title: ยินดีต้อนรับสู่ NEXEDU (เนเซดู)
-description: คลังข้อมูลเอกสารประกอบการเรียนรู้ Open Source
+title: Welcome to NEXEDU
+description: Nexus Education OpenCourseWare
 template: splash
+heading: "select your preferred course"
+domain: "nexedu-a66.pages.dev"
+tagline: "A library of various pedagogical note"
+subtext: "Free, forever, for all mankind"
+creditsHeading: "made by"
+courses:
+  - { name: "Computer Science", url: "/computer-science/" }
+  - { name: "Mathematics", url: "/mathematics/" }
+  - { name: "Physics", url: "/physics/" }
+  - { name: "Chemistry", url: "/chemistry/" }
+  - { name: "Biology", url: "/biology/" }
+  - { name: "Engineering & Technology", url: "/engineering/" }
+  - { name: "Data Science & AI", url: "/data-science/" }
+  - { name: "Economics & Finance", url: "/economics/" }
+  - { name: "Philosophy", url: "/philosophy/" }
+  - { name: "Linguistics & Languages", url: "/linguistics/" }
+  - { name: "History", url: "/history/" }
+  - { name: "Political Science", url: "/political-science/" }
+  - { name: "Psychology", url: "/psychology/" }
+  - { name: "Environmental Science", url: "/env-science/" }
+  - { name: "Medicine & Health Sciences", url: "/medicine/" }
 ---
 
-<div class="homepage-split-container">
-  
-  {/* LEFT HALF: CONTENT & DISCIPLINES */}
-  <div class="left-half">
-    <p class="select-heading">เลือกวิชาที่คุณต้องการเรียนรู้</p>
-    
-    <div class="discipline-scroll-box">
-      <a href="/th/computer-science/" class="discipline-link">วิทยาการคอมพิวเตอร์ (Computer Science)</a>
-      <a href="/th/mathematics/" class="discipline-link">คณิตศาสตร์ (Mathematics)</a>
-      <a href="/th/physics/" class="discipline-link">ฟิสิกส์ (Physics)</a>
-      <a href="/th/chemistry/" class="discipline-link">เคมี (Chemistry)</a>
-      <a href="/th/biology/" class="discipline-link">ชีววิทยา (Biology)</a>
-      <a href="/th/engineering/" class="discipline-link">วิศวกรรมศาสตร์และเทคโนโลยี (Engineering & Technology)</a>
-      <a href="/th/data-science/" class="discipline-link">วิทยาการข้อมูลและปัญญาประดิษฐ์ (Data Science & AI)</a>
-      <a href="/th/economics/" class="discipline-link">เศรษฐศาสตร์และการเงิน (Economics & Finance)</a>
-      <a href="/th/philosophy/" class="discipline-link">ปรัชญา (Philosophy)</a>
-      <a href="/th/linguistics/" class="discipline-link">ภาษาศาสตร์และภาษาต่างๆ (Linguistics & Languages)</a>
-      <a href="/th/history/" class="discipline-link">ประวัติศาสตร์ (History)</a>
-      <a href="/th/political-science/" class="discipline-link">รัฐศาสตร์ (Political Science)</a>
-      <a href="/th/psychology/" class="discipline-link">จิตวิทยา (Psychology)</a>
-      <a href="/th/env-science/" class="discipline-link">วิทยาศาสตร์สิ่งแวดล้อม (Environmental Science)</a>
-      <a href="/th/medicine/" class="discipline-link">แพทยศาสตร์และวิทยาศาสตร์สุขภาพ (Medicine & Health Sciences)</a>
-    </div>
-  </div>
+import CourseSelector from '/src/components/CourseSelector.astro';
 
-  {/* RIGHT HALF: PURPLE BRAND CARD */}
-  <div class="right-half brand-card">
-    <div class="brand-main-info">
-      <p class="brand-domain">nexudu.pages.dev</p>
-      <p class="brand-tagline">คลังคอร์สสอนวิชาที่หลากหลาย</p>
-      <p class="brand-subtext">ความรู้ฟรีตลอดไปเพื่อมวลมนุษยชาติ</p>
-    </div>
-    
-    <div class="brand-credits">
-      <p class="credits-heading">สร้างสรรค์โดย</p>
-      <div class="credits-links">
-        <a href="https://github.com/HamirinTK" target="_blank" rel="noopener noreferrer">HamirinTK</a>
-        <span class="credit-separator">&</span>
-        <a href="https://github.com/Mar13554" target="_blank" rel="noopener noreferrer">Mar13554</a>
-      </div>
-    </div>
-  </div>
-
-</div>
+<CourseSelector {...frontmatter} />
