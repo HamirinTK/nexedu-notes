@@ -1,4 +1,6 @@
 ---
+import { getCollection } from 'astro:content';
+
 interface Course {
   name: string;
   url: string;
@@ -13,6 +15,8 @@ interface Props {
   creditsHeading: string;
   creditsHeading2: string;
   creditsHeading3: string;
+  lang?: string;
+  noTopicsMessage?: string;
 }
 
 const {
@@ -24,63 +28,170 @@ const {
   creditsHeading,
   creditsHeading2,
   creditsHeading3,
+  lang = 'en',
+  noTopicsMessage,
 } = Astro.props;
 
+// ── Constants ──
 const link2Text = "N-N-N";
 const link2Url = "https://n-n-n-website.onrender.com/";
-
 const link3Text = "GitHub";
 const link3Url = "https://github.com/HamirinTK/nexedu-notes";
+
+// ── Build a map: subject ID → array of topics (name, url) ──
+// 1. Generate subject ID from the provided course URL
+const coursesWithId = courses.map((course) => {
+  // Remove leading/trailing slashes → e.g., "/math/" → "math"
+  const id = course.url.replace(/^\/|\/$/g, '');
+  return { ...course, id };
+});
+
+// 2. Fetch all docs once
+const allDocs = await getCollection('docs');
+
+// 3. Initialize the map with empty arrays
+const courseTopicsMap: Record<string, { name: string; url: string }[]> = {};
+coursesWithId.forEach((course) => {
+  courseTopicsMap[course.id] = [];
+});
+
+// 4. Populate topics from real MDX files
+allDocs.forEach((doc) => {
+  const parts = doc.id.split('/'); // e.g., ["en", "math", "welcome.mdx"]
+  if (parts[0] === lang && parts.length >= 3) {
+    const subject = parts[1];             // "math"
+    // Only if this subject is in our map
+    if (courseTopicsMap[subject] !== undefined) {
+      // The topic is the filename without extension, but we want the full path up to the file
+      // Example: "en/math/welcome.mdx" → "/en/math/welcome"
+      const cleanUrl = `/${doc.id.replace(/\.[^/.]+$/, '')}`;
+      courseTopicsMap[subject].push({
+        name: doc.data.title || 'Untitled Topic',
+        url: cleanUrl,
+      });
+    }
+  }
+});
 ---
 
 <div class="homepage-split-container">
   
-  <!-- LEFT HALF -->
+  <!-- LEFT HALF: Subject List -->
   <div class="left-half">
     <p class="select-heading">{heading}</p>
-    
     <div class="discipline-scroll-box">
-      {courses.map((course) => (
-        <a href={course.url} class="discipline-link">{course.name}</a>
+      {coursesWithId.map((course) => (
+        <a 
+          href="#" 
+          class="discipline-link" 
+          data-subject-id={course.id}
+          data-subject-name={course.name}
+        >
+          {course.name}
+        </a>
       ))}
     </div>
-
-    <!-- End line -->
     <hr class="course-list-end-line" />
   </div>
 
-  <!-- RIGHT HALF -->
+  <!-- RIGHT HALF: Dynamic Panel -->
   <div class="right-half brand-card">
-    <div class="brand-main-info">
-      <p class="brand-domain">{domain}</p>
-      <p class="brand-tagline">{tagline}</p>
-      <p class="brand-subtext">{subtext}</p>
-    </div>
     
-    <div class="brand-credits">
-      <!-- First credit row -->
-      <p class="credits-heading">{creditsHeading}</p>
-      <div class="credits-links">
-        <a href="https://github.com/HamirinTK" target="_blank" rel="noopener noreferrer">HamirinTK</a>
-        <span class="credit-separator">&</span>
-        <a href="https://github.com/Mar13554" target="_blank" rel="noopener noreferrer">Mar13554</a>
+    <!-- VIEW 1: Default Brand Info -->
+    <div id="default-brand-view" class="view-panel active-view">
+      <div class="brand-main-info">
+        <p class="brand-domain">{domain}</p>
+        <p class="brand-tagline">{tagline}</p>
+        <p class="brand-subtext">{subtext}</p>
       </div>
-
-      <!-- Second credit row (new) -->
-      <p class="credits-heading">{creditsHeading2}</p>
-      <div class="credits-links">
-        <a href={link2Url} target="_blank" rel="noopener noreferrer">{link2Text}</a>
-      </div>
-
-      <!-- Third credit row (new) -->
-      <p class="credits-heading">{creditsHeading3}</p>
-      <div class="credits-links">
-        <a href={link3Url} target="_blank" rel="noopener noreferrer">{link3Text}</a>
+      <div class="brand-credits">
+        <p class="credits-heading">{creditsHeading}</p>
+        <div class="credits-links">
+          <a href="https://github.com/HamirinTK" target="_blank">HamirinTK</a>
+          <span class="credit-separator">&</span>
+          <a href="https://github.com/Mar13554" target="_blank">Mar13554</a>
+        </div>
+        <p class="credits-heading">{creditsHeading2}</p>
+        <div class="credits-links">
+          <a href={link2Url} target="_blank">{link2Text}</a>
+        </div>
+        <p class="credits-heading">{creditsHeading3}</p>
+        <div class="credits-links">
+          <a href={link3Url} target="_blank">{link3Text}</a>
+        </div>
       </div>
     </div>
-  </div>
 
+    <!-- VIEW 2: Topic Selector -->
+    <div id="topic-selector-view" class="view-panel hidden-view">
+      <div class="topic-header-row">
+        <button id="back-to-brand-btn" class="circle-return-btn" aria-label="Return to brand info">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+        </button>
+        <h3 id="selected-subject-title" class="brand-domain">Subject Name</h3>
+      </div>
+      <div id="dynamic-topic-list" class="topic-list-container">
+        <!-- Populated by JavaScript -->
+      </div>
+    </div>
+
+  </div>
 </div>
+
+<script define:vars={{ courseTopicsMap, noTopicsMessage }}>
+  // ── Debug: check map in console ──
+  console.log('🗺️ courseTopicsMap loaded:', courseTopicsMap);
+
+  const links = document.querySelectorAll('.discipline-link');
+  const defaultView = document.getElementById('default-brand-view');
+  const topicView = document.getElementById('topic-selector-view');
+  const backBtn = document.getElementById('back-to-brand-btn');
+  const topicList = document.getElementById('dynamic-topic-list');
+  const subjectTitle = document.getElementById('selected-subject-title');
+
+  links.forEach(link => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+
+      const subjectId = link.dataset.subjectId;
+      const subjectName = link.dataset.subjectName;
+      const topics = courseTopicsMap[subjectId] || [];
+
+      console.log(`📂 ${subjectName} → ${topics.length} topics found`);
+
+      subjectTitle.textContent = subjectName;
+      topicList.innerHTML = '';
+
+      if (topics.length > 0) {
+        topics.forEach(topic => {
+          const a = document.createElement('a');
+          a.href = topic.url;
+          a.className = 'topic-sub-link';
+          a.textContent = topic.name;
+          topicList.appendChild(a);
+        });
+      } else {
+        const msg = document.createElement('p');
+        msg.className = 'no-topics-msg';
+        msg.textContent = noTopicsMessage;
+        topicList.appendChild(msg);
+      }
+
+      // Swap views
+      defaultView.classList.remove('active-view');
+      defaultView.classList.add('hidden-view');
+      topicView.classList.remove('hidden-view');
+      topicView.classList.add('active-view');
+    });
+  });
+
+  backBtn.addEventListener('click', () => {
+    topicView.classList.remove('active-view');
+    topicView.classList.add('hidden-view');
+    defaultView.classList.remove('hidden-view');
+    defaultView.classList.add('active-view');
+  });
+</script>
 
 <style>
   .course-list-end-line {

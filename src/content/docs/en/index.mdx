@@ -1,32 +1,29 @@
 ---
-title: Welcome to NEXEDU
+title: ""
 description: Nexus Education OpenCourseWare
 template: splash
-heading: "select your preferred course"
-domain: "nexedu-a66.pages.dev"
-tagline: "A library of various pedagogical notes"
-subtext: "Free, forever, for all mankind"
-creditsHeading: "made by"
-creditsHeading2: "N-N-N Environment"
-creditsHeading3: "Our Repository"
-courses:
-  - { name: "Computer Science", url: "/computer-science/" }
-  - { name: "Mathematics", url: "/mathematics/" }
-  - { name: "Physics", url: "/physics/" }
-  - { name: "Chemistry", url: "/chemistry/" }
-  - { name: "Biology", url: "/biology/" }
-  - { name: "Engineering & Technology", url: "/engineering/" }
-  - { name: "Data Science & AI", url: "/data-science/" }
-  - { name: "Economics & Finance", url: "/economics/" }
-  - { name: "Philosophy", url: "/philosophy/" }
-  - { name: "Linguistics & Languages", url: "/linguistics/" }
-  - { name: "History", url: "/history/" }
-  - { name: "Political Science", url: "/political-science/" }
-  - { name: "Psychology", url: "/psychology/" }
-  - { name: "Environmental Science", url: "/env-science/" }
-  - { name: "Medicine & Health Sciences", url: "/medicine/" }
+hero:
+  actions: []
 ---
 
-import CourseSelector from '/src/components/CourseSelector.astro';
+import CourseSelector from '../../../components/CourseSelector.astro';
 
-<CourseSelector {...frontmatter} />
+<CourseSelector 
+  lang="en"
+  heading="Select your preferred subject"
+  domain="nexedu-a66.pages.dev"
+  tagline="A library of various pedagogical notes"
+  subtext="Free, forever, for all mankind"
+  creditsHeading="made by"
+  creditsHeading2="n-n-n environment"
+  creditsHeading3="our repository"
+  noTopicsMessage="No topics yet, check back soon!"
+  courses={[
+    { name: "Computer Science", url: "/en/computer-science", id: "computer-science" },
+    { name: "Mathematics", url: "/math/", id: "math" },
+    { name: "Physics", url: "/en/physics", id: "physics" },
+    { name: "Chemistry", url: "/en/chemistry", id: "chemistry" },
+    { name: "Biology", url: "/en/biology", id: "biology" },
+    { name: "Engineering & Technology", url: "/en/engineering", id: "engineering" }
+  ]}
+/>

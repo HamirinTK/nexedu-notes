@@ -35,7 +35,6 @@
   }
 }
 .select-heading {
-  text-transform: lowercase;
   font-size: 18px;
   font-weight: 500;
   color: var(--sl-color-gray-3);
@@ -58,11 +57,43 @@
   text-decoration: none;
   padding: 18px 0;
   border-bottom: 1px solid var(--sl-color-gray-5);
-  transition: color 0.2s ease;
+  transition: color 0.2s ease, padding 0.2s ease;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
 }
 
+/* Base state for the ket notation pseudo-elements */
+.discipline-link::before,
+.discipline-link::after {
+  color: #A865B5;
+  opacity: 0;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  font-weight: 700;
+}
+
+.discipline-link::before {
+  content: "|";
+  margin-right: 4px;
+  transform: translateX(-4px);
+}
+
+.discipline-link::after {
+  content: "⟩";
+  margin-left: 4px;
+  transform: translateX(4px);
+}
+
+/* Hover effects */
 .discipline-link:hover {
   color: #A865B5;
+  padding-left: 6px; /* Shifts the text slightly right to balance the | bracket */
+}
+
+.discipline-link:hover::before,
+.discipline-link:hover::after {
+  opacity: 1;
+  transform: translateX(0); /* Snaps brackets cleanly into place */
 }
 
 /* Custom Purple Scrollbar */
@@ -240,4 +271,188 @@
   border: 0;
   border-top: 2px solid var(--sl-color-gray-5);
   opacity: 0.6;
+}
+
+/* --- VIEW SWAPPING LOGIC --- */
+.view-panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.hidden-view {
+  display: none !important;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.active-view {
+  opacity: 1;
+  animation: fadeSlideIn 0.3s forwards;
+}
+
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateX(10px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+/* --- DYNAMIC TOPIC UI --- */
+#topic-selector-view {
+  justify-content: flex-start;
+  gap: 24px;
+}
+
+.topic-header-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+  padding-bottom: 16px;
+}
+
+/* Dark/Light Mode compatible Return Button */
+.circle-return-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid var(--sl-color-text);
+  background-color: var(--sl-color-bg);
+  color: var(--sl-color-text);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.circle-return-btn:hover {
+  transform: scale(1.05);
+  background-color: var(--sl-color-text);
+  color: var(--sl-color-bg);
+}
+
+.topic-list-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
+  max-height: 250px;
+}
+
+.topic-sub-link {
+  font-size: 18px;
+  font-weight: 600;
+  color: #ffffff;
+  text-decoration: none;
+  padding: 12px 16px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.topic-sub-link:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+  transform: translateX(4px);
+}
+/* --- EMPTY STATE MSG --- */
+.no-topics-msg {
+  font-size: 18px;
+  font-weight: 500;
+  color: #ffffff;
+  opacity: 0.8;
+  margin-top: 16px !important;
+  text-align: left;
+  font-style: italic;
+}
+
+/* --- VIEW SWAPPING (must be at the end) --- */
+.view-panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.hidden-view {
+  display: none !important;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.active-view {
+  display: flex !important;
+  opacity: 1;
+  animation: fadeSlideIn 0.3s forwards;
+}
+
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateX(10px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+/* --- Topic list styling --- */
+.topic-list-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
+  max-height: 250px;
+  margin-top: 8px;
+}
+
+.topic-sub-link {
+  font-size: 18px;
+  font-weight: 600;
+  color: #ffffff;
+  text-decoration: none;
+  padding: 12px 16px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.topic-sub-link:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+  transform: translateX(4px);
+}
+
+.no-topics-msg {
+  font-size: 18px;
+  font-weight: 500;
+  color: #ffffff;
+  opacity: 0.8;
+  margin-top: 16px !important;
+  font-style: italic;
+}
+
+/* --- Return button (dark/light mode compatible) --- */
+.circle-return-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid var(--sl-color-text);
+  background-color: var(--sl-color-bg);
+  color: var(--sl-color-text);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.circle-return-btn:hover {
+  transform: scale(1.05);
+  background-color: var(--sl-color-text);
+  color: var(--sl-color-bg);
+}
+
+.topic-header-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+  padding-bottom: 16px;
 }
