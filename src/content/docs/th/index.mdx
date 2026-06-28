@@ -1,33 +1,38 @@
 ---
-title: ยินดีต้อนรับสู่ NEXEDU
-description: คลังข้อมูลเอกสารประกอบการเรียนรู้ OpenCourseWare โดย Nexus Education
+title: "ยินดีต้อนรับสู่ NEXEDU (เนเซดู)"
+description: Nexus Education OpenCourseWare
 template: splash
-heading: "เลือกวิชาที่คุณต้องการเรียนรู้"
-domain: "nexedu-a66.pages.dev"
-tagline: "แหล่งรวมสรุปเนื้อหาและบทเรียนที่หลากหลาย"
-subtext: "เข้าถึงความรู้ฟรี ตลอดไป เพื่อทุกคน"
-creditsHeading: "พัฒนาโดย"
-creditsHeading2: "N-N-N Environment"
-creditsHeading3: "คลังข้อมูลของเรา (Repository)"
-noTopicsMessage="รอก่อนนะ ยังไม่มีข้อมูล"
-courses:
-  - { name: "วิทยาการคอมพิวเตอร์", url: "/th/computer-science/" }
-  - { name: "คณิตศาสตร์", url: "/th/mathematics/" }
-  - { name: "ฟิสิกส์", url: "/th/physics/" }
-  - { name: "เคมี", url: "/th/chemistry/" }
-  - { name: "ชีววิทยา", url: "/th/biology/" }
-  - { name: "วิศวกรรมศาสตร์และเทคโนโลยี", url: "/th/engineering/" }
-  - { name: "วิทยาการข้อมูลและปัญญาประดิษฐ์", url: "/th/data-science/" }
-  - { name: "เศรษฐศาสตร์และการเงิน", url: "/th/economics/" }
-  - { name: "ปรัชญา", url: "/th/philosophy/" }
-  - { name: "ภาษาศาสตร์และภาษาต่างๆ", url: "/th/linguistics/" }
-  - { name: "ประวัติศาสตร์", url: "/th/history/" }
-  - { name: "รัฐศาสตร์", url: "/th/political-science/" }
-  - { name: "จิตวิทยา", url: "/th/psychology/" }
-  - { name: "วิทยาศาสตร์สิ่งแวดล้อม", url: "/th/env-science/" }
-  - { name: "แพทยศาสตร์และวิทยาศาสตร์สุขภาพ", url: "/th/medicine/" }
+hero:
+  actions: []
 ---
 
-import CourseSelector from '/src/components/CourseSelector.astro';
+import CourseSelector from '../../../components/CourseSelector.astro';
 
-<CourseSelector {...frontmatter} />
+<CourseSelector 
+  lang="th"
+  heading="เลือกวิชาที่คุณต้องการเรียนรู้"
+  domain="nexedu-a66.pages.dev"
+  tagline="แหล่งรวมสรุปเนื้อหาและบทเรียนที่หลากหลาย"
+  subtext="เข้าถึงความรู้ฟรี ตลอดไป เพื่อทุกคน"
+  creditsHeading="พัฒนาโดย"
+  creditsHeading2="N-N-N Environment"
+  creditsHeading3="คลังข้อมูลของเรา (Repository)"
+  noTopicsMessage="รอก่อนนะ ยังไม่มีข้อมูล"
+  courses={[
+    { name: "วิทยาการคอมพิวเตอร์", url: "/com-sci/", id: "com-sci" },
+    { name: "คณิตศาสตร์", url: "/math/", id: "math" },
+    { name: "ฟิสิกส์", url: "/phys/", id: "phys" },
+    { name: "เคมี", url: "/chem/", id: "chem" },
+    { name: "ชีววิทยา", url: "/bio/", id: "bio" },
+    { name: "วิศวกรรมศาสตร์และเทคโนโลยี", url: "/eng/", id: "eng" },
+    { name: "วิทยาการข้อมูลและปัญญาประดิษฐ์", url: "/data-sci/", id: "data-sci" },
+    { name: "เศรษฐศาสตร์และการเงิน", url: "/econ/", id: "econ" },
+    { name: "ปรัชญา", url: "/phil/", id: "phil" },
+    { name: "ภาษาศาสตร์และภาษาต่างๆ", url: "/lang-study/", id: "lang-study" },
+    { name: "ประวัติศาสตร์", url: "/history/", id: "history" },
+    { name: "รัฐศาสตร์", url: "/pol-sci/", id: "pol-sci" },
+    { name: "จิตวิทยา", url: "/psych/", id: "psych" },
+    { name: "วิทยาศาสตร์สิ่งแวดล้อม", url: "/env-sci/", id: "env-sci" },
+    { name: "แพทยศาสตร์และวิทยาศาสตร์สุขภาพ", url: "/med/", id: "med" }
+  ]}
+/>
