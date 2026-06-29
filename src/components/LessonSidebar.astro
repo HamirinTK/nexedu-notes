@@ -24,73 +24,140 @@ const {
   treeLabel,                 
 } = Astro.props;
 
-const pathSegments = path.split('/').filter(Boolean);
-const currentLang = pathSegments[0] || 'en';
-const subjectSlug = pathSegments[1] || '';
+// Parse the URL path to extract language and subject slug
+function parseRoutePath(urlPath: string) {
+  const segments = urlPath.split('/').filter(Boolean);
+  return {
+    segments,
+    currentLang: segments[0] || 'en',
+    subjectSlug: segments[1] || ''
+  };
+}
+const { segments, currentLang, subjectSlug } = parseRoutePath(path);
 
-const docs = await getCollection('docs');
-const treeTopics = docs.filter(doc => {
-  const parts = doc.id.split('/');
-  return parts[0] === currentLang && parts[1] === subjectSlug && !doc.id.endsWith('index.mdx');
+// Filter topics by language and subject
+function filterTopicsBySubject(metaDocs: any[], lang: string, subject: string) {
+  return metaDocs.filter(doc => {
+    // Standardize IDs across loaders
+    const normalizedId = doc.id.replace(/^src\/content\/docs\//, '');
+    const parts = normalizedId.split('/');
+    
+    const matchesLang = parts[0] === lang;
+    const matchesSubject = parts[1] === subject;
+    
+    // Ignore the top-level course overview file (e.g., en/math/index.json)
+    const isNotCourseIndex = !(parts.length === 3 && parts[2].startsWith('index'));
+    
+    return matchesLang && matchesSubject && isNotCourseIndex;
+  });
+}
+// Read from the custom json metadata collection
+const docsMeta = await getCollection('docsMeta');
+const treeTopics = filterTopicsBySubject(docsMeta, currentLang, subjectSlug);
+
+// Find the current lesson metadata based on the path
+const cleanCurrentPath = path.replace(/^\/|\/$/g, '');
+const currentLessonMeta = docsMeta.find((doc) => {
+  const normalizedId = doc.id.replace(/^src\/content\/docs\//, '');
+  let cleanId = normalizedId.replace(/\.[^/.]+$/, '');
+  const pathParts = cleanId.split('/');
+  
+  if (pathParts.length >= 2 && pathParts[pathParts.length - 1] === pathParts[pathParts.length - 2]) {
+    pathParts.pop();
+    cleanId = pathParts.join('/');
+  } else if (pathParts.length >= 2 && pathParts[pathParts.length - 1] === 'index') {
+    pathParts.pop();
+    cleanId = pathParts.join('/');
+  }
+  return cleanId === cleanCurrentPath;
+});
+
+// Use the current lesson metadata to override the sidebar properties if available
+const sidebarTitle = currentLessonMeta?.data?.title || title || 'Untitled';
+const sidebarImage = currentLessonMeta?.data?.image || image;
+const sidebarLearnItems = currentLessonMeta?.data?.learnItems || learnItems;
+const sidebarLearnLabel = currentLessonMeta?.data?.learnLabel || learnLabel;
+const sidebarLearnFallback = currentLessonMeta?.data?.learnFallback || learnFallback;
+const sidebarTreeLabel = currentLessonMeta?.data?.treeLabel || treeLabel;
+
+// Format the topics for display in the sidebar
+const formattedTreeTopics = treeTopics.map((topic) => {
+  const normalizedId = topic.id.replace(/^src\/content\/docs\//, '');
+  const cleanId = normalizedId.replace(/\.[^/.]+$/, '');
+  
+  const pathParts = cleanId.split('/');
+  let finalRoute = cleanId;
+  
+  // Collapse duplicate path endpoints (test/test -> test)
+  if (pathParts.length >= 2 && pathParts[pathParts.length - 1] === pathParts[pathParts.length - 2]) {
+    pathParts.pop();
+    finalRoute = pathParts.join('/');
+  }
+  // Collapse directory indices (test/index -> test)
+  else if (pathParts.length >= 2 && pathParts[pathParts.length - 1] === 'index') {
+    pathParts.pop();
+    finalRoute = pathParts.join('/');
+  }
+  // Sanitize the inbound comparison route to prevent mismatching edge slashes
+  const cleanCurrentPath = path.replace(/^\/|\/$/g, '');
+  return {
+    cleanId: finalRoute,
+    isActive: finalRoute === cleanCurrentPath,
+    displayTitle: topic.data.title 
+      || (topic.data as any).sidebarTitle 
+      || pathParts[pathParts.length - 1] 
+      || 'Untitled'
+  };
 });
 ---
 
 <div class="lesson-sidebar">
   <div class="sidebar-path">
-    {pathSegments.map((segment, index) => (
+    {segments.map((segment, index) => (
       <span>
         {segment}
-        {index < pathSegments.length - 1 && <span class="path-separator"> / </span>}
+        {index < segments.length - 1 && <span class="path-separator"> / </span>}
       </span>
     ))}
   </div>
 
-  <h2 class="sidebar-title">{title}</h2>
+  <h2 class="sidebar-title">{sidebarTitle}</h2>
 
   <div class="sidebar-image-placeholder">
-    {image ? (
-      <img src={image} alt={title} />
+    {sidebarImage ? (
+      <img src={sidebarImage} alt={sidebarTitle} />
     ) : (
       <span style="color: rgba(255,255,255,0.5);">image</span>
     )}
   </div>
 
   <div class="learn-section">
-    {learnLabel && <h3 class="learn-section-label">{learnLabel}</h3>}
-    {learnItems.length > 0 ? (
+    {sidebarLearnLabel && <h3 class="learn-section-label">{sidebarLearnLabel}</h3>}
+    {sidebarLearnItems.length > 0 ? (
       <div class="learn-section-content">
         <ul>
-          {learnItems.map((item) => (
+          {sidebarLearnItems.map((item: string) => (
             <li>{item}</li>
           ))}
         </ul>
       </div>
     ) : (
       <p class="learn-section-content-fallback" style="color: rgba(255,255,255,0.8); font-size: 14px; margin: 0;">
-        {learnFallback}
+        {sidebarLearnFallback}
       </p>
     )}
   </div>
 
   <div class="sidebar-tree-container">
-    {treeLabel && <span class="sidebar-tree-label">{treeLabel}</span>}
+    {sidebarTreeLabel && <span class="sidebar-tree-label">{sidebarTreeLabel}</span>}
     <div class="topic-tree-box">
       {treeTopics.length > 0 ? (
         <ul class="tree-list">
-          {treeTopics.map((topic) => {
-            const cleanId = topic.id.replace(/\.[^/.]+$/, '');
-            const isActive = cleanId === path;
-            
-            const displayTitle = topic.data.title 
-              || (topic.data as any).sidebarTitle
-              || cleanId.split('/').pop();
-            
-            return (
-              <li class={`tree-item ${isActive ? 'active' : ''}`}>
-                <a href={`/${cleanId}`}>{displayTitle}</a>
-              </li>
-            );
-          })}
+          {formattedTreeTopics.map(({ cleanId, isActive, displayTitle }) => (
+            <li class={`tree-item ${isActive ? 'active' : ''}`}>
+              <a href={`/${cleanId}`}>{displayTitle}</a>
+            </li>
+          ))}
         </ul>
       ) : (
         <p class="tree-empty-msg" style="color: rgba(255,255,255,0.7); font-size: 12px; margin: 10px;">a tree of topic inside</p>

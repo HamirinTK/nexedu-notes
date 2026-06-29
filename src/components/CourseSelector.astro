@@ -47,7 +47,7 @@ const coursesWithId = courses.map((course) => {
 });
 
 // 2. Fetch all docs once
-const allDocs = await getCollection('docs');
+const allDocs = await getCollection('docsMeta');
 
 // 3. Initialize the map with empty arrays
 const courseTopicsMap: Record<string, { name: string; url: string }[]> = {};
@@ -57,18 +57,32 @@ coursesWithId.forEach((course) => {
 
 // 4. Populate topics from real MDX files
 allDocs.forEach((doc) => {
-  const parts = doc.id.split('/'); // e.g., ["en", "math", "welcome.mdx"]
+  const normalizedId = doc.id.replace(/^src\/content\/docs\//, '');
+  const parts = normalizedId.split('/'); 
+  
   if (parts[0] === lang && parts.length >= 3) {
     const subject = parts[1];             // "math"
-    // Only if this subject is in our map
     if (courseTopicsMap[subject] !== undefined) {
-      // The topic is the filename without extension, but we want the full path up to the file
-      // Example: "en/math/welcome.mdx" → "/en/math/welcome"
-      const cleanUrl = `/${doc.id.replace(/\.[^/.]+$/, '')}`;
-      courseTopicsMap[subject].push({
-        name: doc.data.title || 'Untitled Topic',
-        url: cleanUrl,
-      });
+      let cleanPath = normalizedId.replace(/\.[^/.]+$/, ''); // strip extension
+      const pathParts = cleanPath.split('/');
+      // Case A: File name matches folder name (e.g., test/test -> test)
+      if (pathParts.length >= 2 && pathParts[pathParts.length - 1] === pathParts[pathParts.length - 2]) {
+        pathParts.pop();
+        cleanPath = pathParts.join('/');
+      }
+      // Case B: File is an index inside a subfolder (e.g., test/index -> test)
+      else if (pathParts.length >= 2 && pathParts[pathParts.length - 1] === 'index') {
+        pathParts.pop();
+        cleanPath = pathParts.join('/');
+      }
+      const cleanUrl = `/${cleanPath}`;
+      // Prevent mapping the main course index overview (e.g., en/math/index) as a subtopic
+      if (pathParts.length >= 3) {
+        courseTopicsMap[subject].push({
+          name: doc.data.title || 'Untitled Topic',
+          url: cleanUrl,
+        });
+      }
     }
   }
 });
