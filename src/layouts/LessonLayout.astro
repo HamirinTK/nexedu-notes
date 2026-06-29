@@ -1,0 +1,113 @@
+---
+// src/layouts/LessonLayout.astro
+import CustomHeader from '../components/CustomHeader.astro';
+import LessonSidebar from '../components/LessonSidebar.astro';
+import { Icon } from '@astrojs/starlight/components';
+import '../styles/lesson.css';
+
+export interface Props {
+  title?: string;
+  description?: string;
+  sidebarTitle?: string;
+  image?: string;
+  learnItems?: string[];
+  learnLabel?: string;
+  learnFallback?: string;
+  dropdownLabel?: string;
+  treeLabel?: string;
+  showPractice?: boolean;
+  practiceLabel?: string;
+  showReturn?: boolean;
+  returnLabel?: string;
+  lang?: string;
+  frontmatter?: Record<string, any>;
+  entry?: { data: Record<string, any> };
+}
+
+// Safely merge Starlight's validated data with raw MDX frontmatter
+const starlightData = Astro.props.entry?.data || {};
+const mdxFrontmatter = Astro.props.frontmatter || {};
+const props = { ...Astro.props, ...mdxFrontmatter, ...starlightData };
+
+const {
+  title = "Untitled",  
+  description = "",           
+  sidebarTitle,
+  image,
+  learnItems = [],
+  learnLabel = "You will learn",
+  learnFallback = "Details about this lesson will be updated soon.",
+  dropdownLabel,
+  treeLabel = "Topics",
+  showPractice = true,        
+  practiceLabel = "Practice",
+  showReturn = true,          
+  returnLabel = "Return",     
+  lang = "en",       
+} = props;
+
+const sidebarTitleFinal = sidebarTitle || title;
+
+const pathname = Astro.url.pathname;
+const cleanPath = pathname.replace(/^\/|\/$/g, '');
+
+const isWelcome = cleanPath === '' || cleanPath === 'index';
+const isSelector = cleanPath === lang || cleanPath === `${lang}/index`;
+---
+
+{isWelcome ? (
+  <div class="welcome-ui-wrapper"><slot /></div>
+) : isSelector ?
+(
+  <div class="course-selector-ui-wrapper">
+    <CustomHeader />
+    <main class="course-selector-main-content"><slot /></main>
+  </div>
+) : (
+  <div class="lesson-ui-wrapper">
+    <CustomHeader />
+    <div class="lesson-container">
+      
+      <LessonSidebar
+        path={cleanPath}
+        title={sidebarTitleFinal}
+        image={image}
+        learnItems={learnItems}
+        learnLabel={learnLabel}
+        learnFallback={learnFallback}
+        dropdownLabel={dropdownLabel}
+        treeLabel={treeLabel}
+      />
+      
+      <div class="lesson-content">
+        <div class="lesson-content-body"><slot /></div>
+
+        <div class="lesson-actions-overlay">
+          {showPractice && (
+            <button class="btn-practice" id="practice-btn">
+              <Icon name="open-book" size="1.2rem" /> {practiceLabel}
+            </button>
+          )}
+          {showReturn && (
+            <button class="btn-return-selector" id="return-selector-btn" title={returnLabel} aria-label={returnLabel}>
+              <Icon name="left-arrow" size="1.4rem" />
+              </button>
+          )}
+        </div>
+      </div>
+      
+    </div>
+  </div>
+)}
+
+<script>
+  function setup() {
+    document.getElementById('practice-btn')?.addEventListener('click', () => alert('Coming soon!'));
+    document.getElementById('return-selector-btn')?.addEventListener('click', () => {
+      const path = window.location.pathname.split('/').filter(Boolean)[0] || '';
+      window.location.href = `/${path}/`;
+    });
+  }
+  setup();
+  document.addEventListener('astro:page-load', setup);
+</script>

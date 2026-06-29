@@ -1,24 +1,49 @@
 ---
-title: Introductions
-description: Explore the world of numbers, structures, and patterns.
+title: "Algebra Basics: Understanding Variables"
+sidebarTitle: "Algebra Basics"
+description: "A comprehensive introduction to variables and how to evaluate basic algebraic expressions."
+image: "https://images.unsplash.com/photo-1632516643720-e7f5d7d6ecc9?q=80&w=400&auto=format&fit=crop"
+learnLabel: "In this lesson, you will learn:"
+learnItems:
+  - "What a mathematical variable is."
+  - "How to write simple algebraic expressions."
+  - "The difference between variables and constants."
+learnFallback: "Lesson objectives will appear here shortly."
+treeLabel: "Math Topics"
+showPractice: true
+practiceLabel: "Start Practice"
+showReturn: true
+returnLabel: "Back"
 ---
 
-# Welcome to Mathematics
+Welcome to your first step into Algebra! This mock article is designed to test every layout feature of your system, ensuring the sidebar and overlay buttons render perfectly.
 
-Mathematics is the foundation of many disciplines. Whether you're diving into **calculus**, **linear algebra**, **statistics**, or **number theory**, this section gathers all the resources you need to learn and practice.
+## 1. What is a Variable?
 
-## 📚 What you'll find here
+In mathematics, a **variable** is a symbol (usually a letter like $x$, $y$, or $z$) that represents an unknown or changeable quantity. Think of it as a blank box where you can put different numbers.
 
-- **Calculus** – limits, derivatives, integrals, and beyond.
-- **Algebra** – from basic equations to abstract structures.
-- **Statistics & Probability** – data analysis and inference.
-- **Geometry & Topology** – shapes, spaces, and transformations.
+### Real-World Example
+Imagine you are buying apples. If each apple costs 2 dollars, the total cost depends on how many apples you buy. 
+* If you buy **$a$** apples, the total cost is **$2 \times a$** (or simply $2a$).
+* In this scenario, $a$ is our variable.
 
-## 📖 How to use this space
+## 2. Constants vs. Variables
 
-Each topic (e.g., Calculus) is further divided into **sub‑topics** and **lessons**.  
-Use the sidebar navigation or the homepage topic selector to jump straight into any lesson.
+It is important to distinguish between things that change and things that stay the same:
+* **Constant:** A fixed value, like `7`, `100`, or `3.14`. It never changes.
+* **Variable:** A placeholder that can take on different values, like `x` or `n`.
 
----
+> **Note:** Whenever you see a number attached directly to a variable (like $4x$), that number is called a *coefficient*. It means you multiply the variable by that number.
 
-*All content is free, open, and constantly evolving.*
+## 3. Formatting Test
+
+Let's make sure standard Markdown elements render nicely inside your `lesson-content-body` wrapper:
+
+**Code Block Test:**
+```javascript
+// Calculating total cost
+const pricePerApple = 2; // Constant
+let applesBought = 5;    // Variable
+
+let totalCost = pricePerApple * applesBought;
+console.log(`Total cost is $${totalCost}`);

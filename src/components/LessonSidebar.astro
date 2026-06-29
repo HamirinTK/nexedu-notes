@@ -1,0 +1,100 @@
+---
+// src/components/LessonSidebar.astro
+import { getCollection } from 'astro:content';
+
+interface Props {
+  path: string;              
+  title: string;
+  image?: string;
+  learnItems?: string[];
+  learnLabel?: string;
+  learnFallback?: string;
+  dropdownLabel?: string;    
+  treeLabel?: string;
+}
+
+const {
+  path,
+  title,
+  image,
+  learnItems = [],
+  learnLabel,                
+  learnFallback,             
+  dropdownLabel,             
+  treeLabel,                 
+} = Astro.props;
+
+const pathSegments = path.split('/').filter(Boolean);
+const currentLang = pathSegments[0] || 'en';
+const subjectSlug = pathSegments[1] || '';
+
+const docs = await getCollection('docs');
+const treeTopics = docs.filter(doc => {
+  const parts = doc.id.split('/');
+  return parts[0] === currentLang && parts[1] === subjectSlug && !doc.id.endsWith('index.mdx');
+});
+---
+
+<div class="lesson-sidebar">
+  <div class="sidebar-path">
+    {pathSegments.map((segment, index) => (
+      <span>
+        {segment}
+        {index < pathSegments.length - 1 && <span class="path-separator"> / </span>}
+      </span>
+    ))}
+  </div>
+
+  <h2 class="sidebar-title">{title}</h2>
+
+  <div class="sidebar-image-placeholder">
+    {image ? (
+      <img src={image} alt={title} />
+    ) : (
+      <span style="color: rgba(255,255,255,0.5);">image</span>
+    )}
+  </div>
+
+  <div class="learn-section">
+    {learnLabel && <h3 class="learn-section-label">{learnLabel}</h3>}
+    {learnItems.length > 0 ? (
+      <div class="learn-section-content">
+        <ul>
+          {learnItems.map((item) => (
+            <li>{item}</li>
+          ))}
+        </ul>
+      </div>
+    ) : (
+      <p class="learn-section-content-fallback" style="color: rgba(255,255,255,0.8); font-size: 14px; margin: 0;">
+        {learnFallback}
+      </p>
+    )}
+  </div>
+
+  <div class="sidebar-tree-container">
+    {treeLabel && <span class="sidebar-tree-label">{treeLabel}</span>}
+    <div class="topic-tree-box">
+      {treeTopics.length > 0 ? (
+        <ul class="tree-list">
+          {treeTopics.map((topic) => {
+            const cleanId = topic.id.replace(/\.[^/.]+$/, '');
+            const isActive = cleanId === path;
+            
+            const displayTitle = topic.data.title 
+              || (topic.data as any).sidebarTitle
+              || cleanId.split('/').pop();
+            
+            return (
+              <li class={`tree-item ${isActive ? 'active' : ''}`}>
+                <a href={`/${cleanId}`}>{displayTitle}</a>
+              </li>
+            );
+          })}
+        </ul>
+      ) : (
+        <p class="tree-empty-msg" style="color: rgba(255,255,255,0.7); font-size: 12px; margin: 10px;">a tree of topic inside</p>
+      )}
+    </div>
+  </div>
+</div>

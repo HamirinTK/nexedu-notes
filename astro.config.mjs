@@ -10,6 +10,7 @@ export default defineConfig({
         './src/styles/global.css',
         './src/styles/header.css',
         './src/styles/homepage.css',
+        './src/styles/lesson.css'
       ],
       defaultLocale: 'en',
       locales: {
@@ -19,6 +20,7 @@ export default defineConfig({
       sidebar: [],
       components: {
         Header: './src/components/CustomHeader.astro',
+        PageFrame: './src/layouts/LessonLayout.astro',
       },
     }),
   ],

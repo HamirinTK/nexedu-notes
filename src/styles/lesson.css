@@ -1,0 +1,221 @@
+/* src/styles/lesson.css */
+
+/* ─── 1. ANTI-NESTING STARLIGHT GLOBAL OVERRIDES ─── */
+
+/* Collapse Starlight's native grid spacing only when the custom lesson UI is present */
+body:has(.lesson-ui-wrapper) {
+  --sl-content-width: 100% !important;
+  --sl-sidebar-width: 0px !important; /* Reclaims the massive empty left gap */
+  --sl-nav-height: 0px !important;    /* Reclaims the top gap */
+}
+
+/* Correctly hide Starlight's default Header and Left Sidebar */
+body:has(.lesson-ui-wrapper) .header, 
+body:has(.lesson-ui-wrapper) .sidebar-pane {
+  display: none !important;
+}
+
+/* Ensure the custom wrapper scales correctly */
+.lesson-ui-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  width: 100%;
+  position: relative;
+  background-color: var(--sl-color-bg);
+  z-index: 10;
+}
+
+/* Strip residual padding/margin from Starlight's internal content wrappers */
+body:has(.lesson-ui-wrapper) .page, 
+body:has(.lesson-ui-wrapper) .main-frame, 
+body:has(.lesson-ui-wrapper) .content-panel, 
+body:has(.lesson-ui-wrapper) main,
+body:has(.lesson-ui-wrapper) .sl-markdown-content {
+  padding: 0 !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+}
+
+/* Safely shift the "Guides" (Right TOC) down so it isn't hidden under your Custom Header */
+body:has(.lesson-ui-wrapper) .right-sidebar-pane {
+  padding-top: 70px !important; /* Adjust this to match your CustomHeader's exact height */
+}
+
+/* ─── 2. RE-LABEL "ON THIS PAGE" TO "GUIDE" ─── */
+starlight-toc h2 {
+  font-size: 0 !important; 
+}
+
+starlight-toc h2::after {
+  content: "Guide"; 
+  font-size: var(--sl-text-h5) !important;
+  font-weight: 600;
+  color: var(--sl-color-white);
+  letter-spacing: 0.05em;
+  display: block;
+}
+
+/* ─── 3. LESSON WINDOW SECTIONS ─── */
+.lesson-container {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 40px;
+  max-width: 1600px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 40px 24px;
+  box-sizing: border-box;
+}
+
+.lesson-sidebar {
+  background-color: #A865B5;
+  border-radius: 16px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  position: sticky;
+  top: 100px; 
+  height: calc(100vh - 140px);
+  box-sizing: border-box;
+  overflow-y: auto;
+}
+
+.sidebar-path {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.75);
+  font-family: monospace;
+}
+.path-separator { color: rgba(255, 255, 255, 0.4); }
+
+.sidebar-title {
+  color: #ffffff !important;
+  font-size: 28px !important;
+  font-weight: 700 !important;
+  margin: 0 !important;
+  line-height: 1.2;
+}
+
+.sidebar-image-placeholder {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 12px;
+  height: 140px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.sidebar-image-placeholder img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.learn-section-label {
+  font-size: 16px;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 8px !important;
+}
+
+.sidebar-tree-container {
+  margin-top: auto;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+.sidebar-tree-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 600;
+  display: block;
+  margin-bottom: 6px;
+}
+.topic-tree-box {
+  background-color: rgba(0, 0, 0, 0.15);
+  border-radius: 8px;
+  padding: 4px;
+  max-height: 150px;
+  overflow-y: auto;
+}
+.tree-list {
+  list-style: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+.tree-item a {
+  display: block;
+  padding: 6px 10px;
+  color: rgba(255, 255, 255, 0.9);
+  text-decoration: none;
+  font-size: 13px;
+  border-radius: 4px;
+}
+.tree-item.active a {
+  background-color: rgba(255, 255, 255, 0.25);
+  font-weight: 700;
+}
+
+.lesson-content {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  min-width: 0;
+  padding-bottom: 120px; 
+}
+
+.lesson-content-title {
+  font-size: 38px !important;
+  font-weight: 800 !important;
+  margin: 0 0 24px 0 !important;
+}
+
+/* ─── 4. FLOATING FOOTER BUTTONS OVERLAY ─── */
+.lesson-actions-overlay {
+  position: fixed;
+  bottom: 40px;
+  right: 40px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  z-index: 9999; 
+}
+
+.btn-practice, .btn-return-selector {
+  background-color: #A865B5;
+  color: #ffffff;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(168, 101, 181, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.btn-practice {
+  padding: 14px 28px;
+  font-size: 15px;
+  font-weight: 600;
+  border-radius: 30px;
+  gap: 10px;
+}
+
+.btn-return-selector {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+}
+
+.btn-practice:hover, .btn-return-selector:hover {
+  background-color: #914ba0;
+  transform: translateY(-3px);
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+  .lesson-container { grid-template-columns: 1fr; }
+  .lesson-sidebar { position: relative; top: 0; height: auto; }
+  .lesson-actions-overlay { bottom: 20px; right: 20px; }
+}
