@@ -333,12 +333,15 @@
   color: var(--sl-color-bg);
 }
 
+/* --- Topic list styling --- */
 .topic-list-container {
   display: flex;
   flex-direction: column;
   gap: 12px;
   overflow-y: auto;
+  overflow-x: hidden;       /* ─── FIX 1: Explicitly prevents any horizontal scrolling ─── */
   max-height: 250px;
+  margin-top: 8px;
 }
 
 .topic-sub-link {
@@ -350,6 +353,11 @@
   background-color: rgba(255, 255, 255, 0.1);
   border-radius: 6px;
   transition: background-color 0.2s ease, transform 0.2s ease;
+
+  /* ─── FIX 2: Forces natural line-wrapping instead of scrolling ─── */
+  white-space: normal;       /* Overrides Starlight's strict inline navigation layout */
+  overflow-wrap: break-word; /* Gracefully handles long text strings or unbroken words */
+  display: block;            /* Ensures standard paragraph line-breaking block model */
 }
 
 .topic-sub-link:hover {
