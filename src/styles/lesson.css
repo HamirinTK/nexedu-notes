@@ -219,3 +219,33 @@ starlight-toc h2::after {
   .lesson-sidebar { position: relative; top: 0; height: auto; }
   .lesson-actions-overlay { bottom: 20px; right: 20px; }
 }
+
+.katex {
+  font: sans-serif; /* ให้โครงสร้างดึงคุณสมบัติฟอนต์คณิตศาสตร์จาก cdn */
+  font-size: 1.1em !important; /* ปรับขนาดให้พอดีและอ่านง่ายร่วมกับภาษาไทย */
+  white-space: nowrap; /* ห้ามตัดบรรทัดกลางคันภายในตัวสูตรเดียว */
+  line-height: 1.2;
+}
+
+/* บล็อกสูตรคณิตศาสตร์กึ่งกลาง ($$...$$) ต้องเว้นระยะบนล่างให้สมดุล */
+.katex-display {
+  display: block;
+  margin: 1.5rem 0 !important;
+  overflow-x: auto; /* หากสูตรยาวเกินไปบนหน้าจอมือถือ ให้เลื่อนซ้ายขวาได้ ไม่ให้ล้นทะลุจอ */
+  overflow-y: hidden;
+  padding: 0.5rem 0;
+}
+
+/* ล้างค่าสไตล์แปลกปลอมที่หลุดมาจาก Markdown Compiler */
+.katex-html {
+  display: inline-block;
+}
+
+/* แก้ไขสัญกรณ์เศษส่วน (\frac) และตัวห้อยลิมิตให้ซ้อนแนวตั้งตรงกันสวยงาม */
+.katex .vlist-t {
+  border-collapse: collapse;
+}
+
+.katex .boxpad {
+  padding: 0;
+}
