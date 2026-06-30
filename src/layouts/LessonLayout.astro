@@ -31,8 +31,7 @@ const mdxFrontmatter = Astro.props.frontmatter || {};
 const props = { ...Astro.props, ...mdxFrontmatter, ...starlightData };
 
 const {
-  title = "Untitled",  
-  description = "",           
+  title = "Untitled",
   sidebarTitle,
   image,
   learnItems = [],
@@ -40,26 +39,32 @@ const {
   learnFallback = "Details about this lesson will be updated soon.",
   dropdownLabel,
   treeLabel = "Topics",
-  showPractice = true,        
+  showPractice = true,
   practiceLabel = "Practice",
-  showReturn = true,          
-  returnLabel = "Return",     
-  lang = "en",       
+  showReturn = true,
+  returnLabel = "Return",
 } = props;
 
 const sidebarTitleFinal = sidebarTitle || title;
 
+// ── ROBUST ROUTING CHECK ──
+// Segment-count based, so it doesn't depend on a `lang` prop matching the
+// actual locale segment in the URL.
 const pathname = Astro.url.pathname;
-const cleanPath = pathname.replace(/^\/|\/$/g, '');
+const pathSegments = pathname.split('/').filter(Boolean);
 
-const isWelcome = cleanPath === '' || cleanPath === 'index';
-const isSelector = cleanPath === lang || cleanPath === `${lang}/index`;
+// Root homepage ("/") has 0 segments (or just "index")
+const isWelcome = pathSegments.length === 0 || (pathSegments.length === 1 && pathSegments[0] === 'index');
+
+// Course selector pages ("/en", "/th", "/en/index") have exactly 1 segment
+const isSelector = pathSegments.length === 1 || (pathSegments.length === 2 && pathSegments[1] === 'index');
+
+const cleanPath = pathSegments.join('/');
 ---
 
 {isWelcome ? (
   <div class="welcome-ui-wrapper"><slot /></div>
-) : isSelector ?
-(
+) : isSelector ? (
   <div class="course-selector-ui-wrapper">
     <CustomHeader />
     <main class="course-selector-main-content"><slot /></main>
@@ -68,7 +73,9 @@ const isSelector = cleanPath === lang || cleanPath === `${lang}/index`;
   <div class="lesson-ui-wrapper">
     <CustomHeader />
     <div class="lesson-container">
-      
+
+      {/* Desktop sidebar — hidden on mobile via CSS, replaced by the
+          bottom sheet below */}
       <LessonSidebar
         path={cleanPath}
         title={sidebarTitleFinal}
@@ -79,7 +86,7 @@ const isSelector = cleanPath === lang || cleanPath === `${lang}/index`;
         dropdownLabel={dropdownLabel}
         treeLabel={treeLabel}
       />
-      
+
       <div class="lesson-content">
         <div class="lesson-content-body"><slot /></div>
 
@@ -92,23 +99,103 @@ const isSelector = cleanPath === lang || cleanPath === `${lang}/index`;
           {showReturn && (
             <button class="btn-return-selector" id="return-selector-btn" title={returnLabel} aria-label={returnLabel}>
               <Icon name="left-arrow" size="1.4rem" />
-              </button>
+            </button>
           )}
+          <button class="btn-sidebar-toggle" id="mobile-sidebar-toggle" aria-label="Open Topics Menu">
+            <Icon name="bars" size="1.4rem" />
+          </button>
         </div>
       </div>
-      
+
+    </div>
+
+    {/* Mobile-only sidebar replacement — same LessonSidebar content,
+        rendered into a swipeable bottom sheet. Hidden on desktop via CSS. */}
+    <div class="bottom-sheet-backdrop" id="lesson-sheet-backdrop"></div>
+    <div class="bottom-sheet" id="lesson-bottom-sheet">
+      <div class="bottom-sheet-handle"></div>
+      <div class="bottom-sheet-content">
+        <LessonSidebar
+          path={cleanPath}
+          title={sidebarTitleFinal}
+          image={image}
+          learnItems={learnItems}
+          learnLabel={learnLabel}
+          learnFallback={learnFallback}
+          dropdownLabel={dropdownLabel}
+          treeLabel={treeLabel}
+        />
+      </div>
     </div>
   </div>
 )}
 
 <script>
-  function setup() {
+  function setupLessonUI() {
+    document.body.style.overflow = '';
+
     document.getElementById('practice-btn')?.addEventListener('click', () => alert('Coming soon!'));
     document.getElementById('return-selector-btn')?.addEventListener('click', () => {
       const path = window.location.pathname.split('/').filter(Boolean)[0] || '';
       window.location.href = `/${path}/`;
     });
+
+    // Mobile Bottom Sheet Configurations
+    const toggleBtn = document.getElementById('mobile-sidebar-toggle');
+    const sheet = document.getElementById('lesson-bottom-sheet');
+    const backdrop = document.getElementById('lesson-sheet-backdrop');
+    
+    // Explicitly typed as HTMLElement to unlock native touch gestures in strict modules
+    const handle = sheet?.querySelector<HTMLElement>('.bottom-sheet-handle');
+
+    if (!sheet || !backdrop || !toggleBtn) return;
+
+    const openSheet = () => {
+      sheet.classList.add('active');
+      backdrop.classList.add('active');
+      document.body.style.overflow = 'hidden';
+    };
+
+    const closeSheet = () => {
+      sheet.classList.remove('active');
+      backdrop.classList.remove('active');
+      sheet.style.transform = '';
+      document.body.style.overflow = '';
+    };
+
+    toggleBtn.addEventListener('click', openSheet);
+    backdrop.addEventListener('click', closeSheet);
+
+    // Hardware touch drag mechanics
+    let startY = 0;
+    let currentY = 0;
+
+    handle?.addEventListener('touchstart', (e: TouchEvent) => {
+      startY = e.touches[0].clientY;
+      sheet.style.transition = 'none';
+    }, { passive: true });
+
+    handle?.addEventListener('touchmove', (e: TouchEvent) => {
+      currentY = e.touches[0].clientY;
+      const deltaY = currentY - startY;
+      if (deltaY > 0) {
+        sheet.style.transform = `translateY(${deltaY}px)`;
+      }
+    }, { passive: true });
+
+    handle?.addEventListener('touchend', () => {
+      sheet.style.transition = 'transform 0.3s cubic-bezier(0.25, 1, 0.5, 1)';
+      const deltaY = currentY - startY;
+      if (deltaY > 120) {
+        closeSheet();
+      } else {
+        sheet.style.transform = 'translateY(0)';
+      }
+      startY = 0;
+      currentY = 0;
+    });
   }
-  setup();
-  document.addEventListener('astro:page-load', setup);
+
+  setupLessonUI();
+  document.addEventListener('astro:page-load', setupLessonUI);
 </script>

@@ -1,5 +1,6 @@
 ---
 import { getCollection } from 'astro:content';
+import '../styles/homepage.css'; // Ensure your authority styles load here
 
 interface Course {
   name: string;
@@ -29,75 +30,56 @@ const {
   creditsHeading2,
   creditsHeading3,
   lang = 'en',
-  noTopicsMessage,
+  noTopicsMessage = "No topics available.",
 } = Astro.props;
 
-// ── Constants ──
+// ── Constants from Original PC Code ──
 const link2Text = "N-N-N";
 const link2Url = "https://n-n-n-website.onrender.com/";
 const link3Text = "GitHub";
 const link3Url = "https://github.com/HamirinTK/nexedu-notes";
 
 // ── Build a map: subject ID → array of topics (name, url) ──
-// 1. Generate subject ID from the provided course URL
 const coursesWithId = courses.map((course) => {
-  // Remove leading/trailing slashes → e.g., "/math/" → "math"
   const id = course.url.replace(/^\/|\/$/g, '');
   return { ...course, id };
 });
 
-// 2. Fetch all docs once
-const allDocs = await getCollection('docsMeta');
+const docs = await getCollection('docs'); 
+const courseTopicsMap: Record<string, Array<{ name: string; url: string }>> = {};
+coursesWithId.forEach(c => { courseTopicsMap[c.id] = []; });
 
-// 3. Initialize the map with empty arrays
-const courseTopicsMap: Record<string, { name: string; url: string }[]> = {};
-coursesWithId.forEach((course) => {
-  courseTopicsMap[course.id] = [];
-});
+docs.forEach((doc) => {
+  const parts = doc.id.split('/');
+  if (parts[0] === lang && parts.length > 2) {
+    const subjectId = parts[1];
+    const cleanUrl = doc.id.replace(/\.[^/.]+$/, '');
+    
+    // Extension-agnostic index check to stop index pages leaking into topics
+    const isIndexFile = cleanUrl.endsWith('/index') || cleanUrl === 'index';
 
-// 4. Populate topics from real MDX files
-allDocs.forEach((doc) => {
-  const normalizedId = doc.id.replace(/^src\/content\/docs\//, '');
-  const parts = normalizedId.split('/'); 
-  
-  if (parts[0] === lang && parts.length >= 3) {
-    const subject = parts[1];             // "math"
-    if (courseTopicsMap[subject] !== undefined) {
-      let cleanPath = normalizedId.replace(/\.[^/.]+$/, ''); // strip extension
-      const pathParts = cleanPath.split('/');
-      // Case A: File name matches folder name (e.g., test/test -> test)
-      if (pathParts.length >= 2 && pathParts[pathParts.length - 1] === pathParts[pathParts.length - 2]) {
-        pathParts.pop();
-        cleanPath = pathParts.join('/');
-      }
-      // Case B: File is an index inside a subfolder (e.g., test/index -> test)
-      else if (pathParts.length >= 2 && pathParts[pathParts.length - 1] === 'index') {
-        pathParts.pop();
-        cleanPath = pathParts.join('/');
-      }
-      const cleanUrl = `/${cleanPath}`;
-      // Prevent mapping the main course index overview (e.g., en/math/index) as a subtopic
-      if (pathParts.length >= 3) {
-        courseTopicsMap[subject].push({
-          name: doc.data.title || 'Untitled Topic',
-          url: cleanUrl,
-        });
-      }
+    if (courseTopicsMap[subjectId] !== undefined && !isIndexFile) {
+      courseTopicsMap[subjectId].push({
+        name: doc.data.title || cleanUrl.split('/').pop() || '',
+        url: `/${cleanUrl}`,
+      });
     }
   }
 });
+
+// JSON data island to safely pass variables to the client script
+const topicData = JSON.stringify({ courseTopicsMap, noTopicsMessage }).replace(/</g, '\\u003c');
 ---
 
 <div class="homepage-split-container">
   
-  <!-- LEFT HALF: Subject List -->
   <div class="left-half">
     <p class="select-heading">{heading}</p>
     <div class="discipline-scroll-box">
       {coursesWithId.map((course) => (
         <a 
           href="#" 
-          class="discipline-link" 
+          class="discipline-link course-select-trigger" 
           data-subject-id={course.id}
           data-subject-name={course.name}
         >
@@ -108,11 +90,9 @@ allDocs.forEach((doc) => {
     <hr class="course-list-end-line" />
   </div>
 
-  <!-- RIGHT HALF: Dynamic Panel -->
   <div class="right-half brand-card">
     
-    <!-- VIEW 1: Default Brand Info -->
-    <div id="default-brand-view" class="view-panel active-view">
+    <div id="desktop-default-view" class="view-panel active-view">
       <div class="brand-main-info">
         <p class="brand-domain">{domain}</p>
         <p class="brand-tagline">{tagline}</p>
@@ -136,75 +116,166 @@ allDocs.forEach((doc) => {
       </div>
     </div>
 
-    <!-- VIEW 2: Topic Selector -->
-    <div id="topic-selector-view" class="view-panel hidden-view">
+    <div id="desktop-topic-view" class="view-panel hidden-view">
       <div class="topic-header-row">
         <button id="back-to-brand-btn" class="circle-return-btn" aria-label="Return to brand info">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
         </button>
-        <h3 id="selected-subject-title" class="brand-domain">Subject Name</h3>
+        <h3 id="desktop-panel-title" class="brand-domain">Subject Name</h3>
       </div>
-      <div id="dynamic-topic-list" class="topic-list-container">
-        <!-- Populated by JavaScript -->
-      </div>
+      <div id="desktop-topics-list" class="topic-list-container">
+        </div>
     </div>
 
   </div>
 </div>
 
-<script define:vars={{ courseTopicsMap, noTopicsMessage }}>
-  // ── Debug: check map in console ──
-  console.log('🗺️ courseTopicsMap loaded:', courseTopicsMap);
+<div class="bottom-sheet-backdrop" id="selector-sheet-backdrop"></div>
+<div class="bottom-sheet" id="selector-bottom-sheet">
+  <div class="bottom-sheet-handle"></div>
+  <div class="bottom-sheet-content">
+    <h2 id="mobile-panel-title" style="margin-top:10px; font-size:24px;">Topics</h2>
+    <div id="mobile-topics-list" style="margin-top:20px; display:flex; flex-direction:column; gap:12px;"></div>
+  </div>
+</div>
 
-  const links = document.querySelectorAll('.discipline-link');
-  const defaultView = document.getElementById('default-brand-view');
-  const topicView = document.getElementById('topic-selector-view');
-  const backBtn = document.getElementById('back-to-brand-btn');
-  const topicList = document.getElementById('dynamic-topic-list');
-  const subjectTitle = document.getElementById('selected-subject-title');
+<script type="application/json" id="course-topics-data" set:html={topicData}></script>
 
-  links.forEach(link => {
-    link.addEventListener('click', (e) => {
-      e.preventDefault();
+<script>
+  interface Topic {
+    name: string;
+    url: string;
+  }
 
-      const subjectId = link.dataset.subjectId;
-      const subjectName = link.dataset.subjectName;
-      const topics = courseTopicsMap[subjectId] || [];
+  interface TopicData {
+    courseTopicsMap: Record<string, Topic[]>;
+    noTopicsMessage: string;
+  }
 
-      console.log(`📂 ${subjectName} → ${topics.length} topics found`);
+  function readTopicData(): TopicData {
+    const el = document.getElementById('course-topics-data');
+    if (!el?.textContent) return { courseTopicsMap: {}, noTopicsMessage: '' };
+    try {
+      return JSON.parse(el.textContent);
+    } catch {
+      return { courseTopicsMap: {}, noTopicsMessage: '' };
+    }
+  }
 
-      subjectTitle.textContent = subjectName;
-      topicList.innerHTML = '';
+  function renderTopicLinks(topics: Topic[], noTopicsMessage: string, linkClass: string): string {
+    if (!topics.length) return `<p class="no-topics-msg">${noTopicsMessage}</p>`;
+    return topics
+      .map((t: Topic) => `<a href="${t.url}" class="topic-sub-link ${linkClass}">${t.name}</a>`)
+      .join('');
+  }
 
-      if (topics.length > 0) {
-        topics.forEach(topic => {
-          const a = document.createElement('a');
-          a.href = topic.url;
-          a.className = 'topic-sub-link';
-          a.textContent = topic.name;
-          topicList.appendChild(a);
-        });
-      } else {
-        const msg = document.createElement('p');
-        msg.className = 'no-topics-msg';
-        msg.textContent = noTopicsMessage;
-        topicList.appendChild(msg);
-      }
+  function setupSelectorUI() {
+    document.body.style.overflow = '';
 
-      // Swap views
-      defaultView.classList.remove('active-view');
-      defaultView.classList.add('hidden-view');
-      topicView.classList.remove('hidden-view');
-      topicView.classList.add('active-view');
+    const { courseTopicsMap, noTopicsMessage } = readTopicData();
+    const triggers = document.querySelectorAll<HTMLElement>('.course-select-trigger');
+    
+    const dTitle = document.getElementById('desktop-panel-title');
+    const dList = document.getElementById('desktop-topics-list');
+    const defaultView = document.getElementById('desktop-default-view');
+    const topicView = document.getElementById('desktop-topic-view');
+    const backBtn = document.getElementById('back-to-brand-btn');
+
+    const mSheet = document.getElementById('selector-bottom-sheet');
+    const mBackdrop = document.getElementById('selector-sheet-backdrop');
+    const mTitle = document.getElementById('mobile-panel-title');
+    const mList = document.getElementById('mobile-topics-list');
+    const handle = mSheet?.querySelector<HTMLElement>('.bottom-sheet-handle');
+
+    const closeMobileSheet = () => {
+      if (!mSheet || !mBackdrop) return;
+      mSheet.classList.remove('active');
+      mBackdrop.classList.remove('active');
+      mSheet.style.transform = '';
+      document.body.style.overflow = '';
+    };
+
+    if (mBackdrop) {
+      mBackdrop.addEventListener('click', closeMobileSheet);
+    }
+
+    if (backBtn && defaultView && topicView) {
+      backBtn.addEventListener('click', () => {
+        topicView.classList.remove('active-view');
+        topicView.classList.add('hidden-view');
+        defaultView.classList.remove('hidden-view');
+        defaultView.classList.add('active-view');
+      });
+    }
+
+    triggers.forEach(trigger => {
+      trigger.addEventListener('click', (e) => {
+        e.preventDefault();
+        const sId = trigger.dataset.subjectId || '';
+        const sName = trigger.dataset.subjectName || '';
+        const topics = courseTopicsMap[sId] || [];
+
+        const isMobileOrTablet = window.innerWidth < 900;
+
+        if (!isMobileOrTablet) {
+          // 💻 PC DESKTOP LOGIC
+          if (dTitle && dList) {
+            dTitle.textContent = sName;
+            dList.innerHTML = renderTopicLinks(topics, noTopicsMessage, 'topic-sub-link--desktop');
+          }
+
+          if (defaultView && topicView) {
+            defaultView.classList.remove('active-view');
+            defaultView.classList.add('hidden-view');
+            topicView.classList.remove('hidden-view');
+            topicView.classList.add('active-view');
+          }
+        } else {
+          // 📱 MOBILE & TABLET LOGIC
+          if (mTitle && mList && mSheet && mBackdrop) {
+            mTitle.textContent = sName;
+            mList.innerHTML = renderTopicLinks(topics, noTopicsMessage, 'topic-sub-link--mobile');
+
+            mSheet.classList.add('active');
+            mBackdrop.classList.add('active');
+            document.body.style.overflow = 'hidden';
+          }
+        }
+      });
     });
-  });
 
-  backBtn.addEventListener('click', () => {
-    topicView.classList.remove('active-view');
-    topicView.classList.add('hidden-view');
-    defaultView.classList.remove('hidden-view');
-    defaultView.classList.add('active-view');
-  });
+    // Touch Drag Mobile System
+    let startY = 0;
+    let currentY = 0;
+
+    if (handle && mSheet) {
+      handle.addEventListener('touchstart', (e: TouchEvent) => {
+        startY = e.touches[0].clientY;
+        mSheet.style.transition = 'none';
+      }, { passive: true });
+
+      handle.addEventListener('touchmove', (e: TouchEvent) => {
+        currentY = e.touches[0].clientY;
+        const deltaY = currentY - startY;
+        if (deltaY > 0) mSheet.style.transform = `translateY(${deltaY}px)`;
+      }, { passive: true });
+
+      handle.addEventListener('touchend', () => {
+        mSheet.style.transition = 'transform 0.3s cubic-bezier(0.25, 1, 0.5, 1)';
+        const deltaY = currentY - startY;
+        if (deltaY > 120) {
+          closeMobileSheet();
+        } else {
+          mSheet.style.transform = 'translateY(0)';
+        }
+        startY = 0;
+        currentY = 0;
+      });
+    }
+  }
+
+  setupSelectorUI();
+  document.addEventListener('astro:page-load', setupSelectorUI);
 </script>
 
 <style>
@@ -213,5 +284,57 @@ allDocs.forEach((doc) => {
     border: 0;
     border-top: 2px solid var(--sl-color-gray-5);
     opacity: 0.6;
+  }
+
+  /* ── FIX: Force Mobile Elements Hidden on PC Screens ── */
+  @media (min-width: 900px) {
+    #selector-bottom-sheet,
+    #selector-sheet-backdrop {
+      display: none !important;
+    }
+  }
+
+  /* Fallback visibility rules for mobile viewports if missing from homepage.css */
+  @media (max-width: 899px) {
+    .bottom-sheet-backdrop {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.6);
+      z-index: 998;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+    .bottom-sheet-backdrop.active {
+      opacity: 1;
+      visibility: visible;
+    }
+    .bottom-sheet {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background: #1e1233; /* Matches your dark design base */
+      border-top-left-radius: 20px;
+      border-top-right-radius: 20px;
+      z-index: 999;
+      transform: translateY(100%);
+      transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+      padding: 16px;
+      box-sizing: border-box;
+    }
+    .bottom-sheet.active {
+      transform: translateY(0);
+    }
+    .bottom-sheet-handle {
+      width: 50px;
+      height: 5px;
+      background: rgba(255, 255, 255, 0.25);
+      border-radius: 3px;
+      margin: 0 auto 12px auto;
+    }
   }
 </style>

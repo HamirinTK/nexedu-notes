@@ -1,39 +1,39 @@
 /* src/styles/homepage.css */
 
-/* --- HOMEPAGE SPLIT LAYOUT --- */
+/* ==========================================================================
+   1. HOMEPAGE SPLIT LAYOUT
+   ========================================================================== */
 .homepage-split-container {
   display: grid;
-  /*Mobile default layout: Single column */
-  grid-template-columns: 1fr; 
+  /* Mobile default layout: single column */
+  grid-template-columns: 1fr;
   gap: 40px;
   max-width: 1200px;
   margin: 40px auto 0 auto;
   padding: 0 20px;
 }
 
-/*Responsive Breakpoint: Desktop Screens (widths above 900px) */
+/* Desktop: side-by-side 50/50 split */
 @media (min-width: 900px) {
   .homepage-split-container {
-    /* Side-by-side 50/50 split layout for desktops */
-    grid-template-columns: 1fr 1fr; 
+    grid-template-columns: 1fr 1fr;
     margin: 60px auto 0 auto;
     padding: 0 40px;
   }
 }
 
-/* Mobile Ordering Engine */
+/* Mobile: brand card jumps above the course list */
 @media (max-width: 899px) {
   .left-half {
-    /* Tells the course selector links list to drop to position #2 */
-    order: 2; 
+    order: 2;
   }
   .right-half.brand-card {
-    /* Tells the purple brand card box to jump up to position #1 */
-    order: 1; 
-    min-height: auto; /* Allow box height to collapse naturally on narrow displays */
+    order: 1;
+    min-height: auto; /* Allow the box to collapse naturally on narrow displays */
     margin-bottom: 20px;
   }
 }
+
 .select-heading {
   font-size: 18px;
   font-weight: 500;
@@ -63,35 +63,41 @@
   align-items: center;
 }
 
-/* Base state for the ket notation pseudo-elements */
+/* Ket-notation bracket decoration, shared with .course-select-trigger below */
 .discipline-link::before,
-.discipline-link::after {
+.discipline-link::after,
+.course-select-trigger::before,
+.course-select-trigger::after {
   color: #A865B5;
   opacity: 0;
   transition: opacity 0.2s ease, transform 0.2s ease;
   font-weight: 700;
 }
 
-.discipline-link::before {
+.discipline-link::before,
+.course-select-trigger::before {
   content: "|";
   margin-right: 4px;
   transform: translateX(-4px);
 }
 
-.discipline-link::after {
+.discipline-link::after,
+.course-select-trigger::after {
   content: "⟩";
   margin-left: 4px;
   transform: translateX(4px);
 }
 
-/* Hover effects */
-.discipline-link:hover {
+.discipline-link:hover,
+.course-select-trigger:hover {
   color: #A865B5;
-  padding-left: 6px; /* Shifts the text slightly right to balance the | bracket */
+  padding-left: 6px; /* Shifts the text right to balance the | bracket */
 }
 
 .discipline-link:hover::before,
-.discipline-link:hover::after {
+.discipline-link:hover::after,
+.course-select-trigger:hover::before,
+.course-select-trigger:hover::after {
   opacity: 1;
   transform: translateX(0); /* Snaps brackets cleanly into place */
 }
@@ -142,28 +148,24 @@
   opacity: 0.85;
 }
 
-/* Credits */
 /* --- CREDITS (inside purple card) --- */
 .brand-credits {
   border-top: 1px solid rgba(255, 255, 255, 0.3);
-  padding-top: 16px; /* was 24px – reduced */
+  padding-top: 16px;
 }
 
-/* All credit headings */
 .credits-heading {
   font-size: 14px;
   text-transform: lowercase;
   color: #ffffff;
   opacity: 0.75;
-  margin: 0 0 4px 0 !important; /* bottom margin reduced from 8px to 4px */
+  margin: 0 0 4px 0 !important;
 }
 
-/* Add top spacing between credit rows (except the first) */
 .credits-heading:not(:first-of-type) {
-  margin-top: 14px !important; /* controls gap between rows */
+  margin-top: 14px !important;
 }
 
-/* Keep the links layout unchanged */
 .credits-links {
   display: flex;
   gap: 8px;
@@ -188,7 +190,9 @@
   opacity: 0.75;
 }
 
-/* --- HOMEPAGE HERO / LANG SELECTOR --- */
+/* ==========================================================================
+   2. HOMEPAGE HERO / LANG SELECTOR
+   ========================================================================== */
 .homepage-hero-wrapper {
   display: flex;
   flex-direction: column;
@@ -209,7 +213,7 @@
   width: 100%;
   height: auto;
   object-fit: contain;
-  filter: drop-shadow(0px 4px 12px rgba(0,0,0,0.1)); 
+  filter: drop-shadow(0px 4px 12px rgba(0, 0, 0, 0.1));
 }
 
 .homepage-brand-header {
@@ -273,109 +277,9 @@
   opacity: 0.6;
 }
 
-/* --- VIEW SWAPPING LOGIC --- */
-.view-panel {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  transition: opacity 0.3s ease, transform 0.3s ease;
-}
-
-.hidden-view {
-  display: none !important;
-  opacity: 0;
-  pointer-events: none;
-}
-
-.active-view {
-  opacity: 1;
-  animation: fadeSlideIn 0.3s forwards;
-}
-
-@keyframes fadeSlideIn {
-  from { opacity: 0; transform: translateX(10px); }
-  to { opacity: 1; transform: translateX(0); }
-}
-
-/* --- DYNAMIC TOPIC UI --- */
-#topic-selector-view {
-  justify-content: flex-start;
-  gap: 24px;
-}
-
-.topic-header-row {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
-  padding-bottom: 16px;
-}
-
-/* Dark/Light Mode compatible Return Button */
-.circle-return-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  border: 2px solid var(--sl-color-text);
-  background-color: var(--sl-color-bg);
-  color: var(--sl-color-text);
-  cursor: pointer;
-  transition: all 0.2s ease;
-  flex-shrink: 0;
-}
-
-.circle-return-btn:hover {
-  transform: scale(1.05);
-  background-color: var(--sl-color-text);
-  color: var(--sl-color-bg);
-}
-
-/* --- Topic list styling --- */
-.topic-list-container {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  overflow-y: auto;
-  overflow-x: hidden;       /* ─── FIX 1: Explicitly prevents any horizontal scrolling ─── */
-  max-height: 250px;
-  margin-top: 8px;
-}
-
-.topic-sub-link {
-  font-size: 18px;
-  font-weight: 600;
-  color: #ffffff;
-  text-decoration: none;
-  padding: 12px 16px;
-  background-color: rgba(255, 255, 255, 0.1);
-  border-radius: 6px;
-  transition: background-color 0.2s ease, transform 0.2s ease;
-
-  /* ─── FIX 2: Forces natural line-wrapping instead of scrolling ─── */
-  white-space: normal;       /* Overrides Starlight's strict inline navigation layout */
-  overflow-wrap: break-word; /* Gracefully handles long text strings or unbroken words */
-  display: block;            /* Ensures standard paragraph line-breaking block model */
-}
-
-.topic-sub-link:hover {
-  background-color: rgba(255, 255, 255, 0.2);
-  transform: translateX(4px);
-}
-/* --- EMPTY STATE MSG --- */
-.no-topics-msg {
-  font-size: 18px;
-  font-weight: 500;
-  color: #ffffff;
-  opacity: 0.8;
-  margin-top: 16px !important;
-  text-align: left;
-  font-style: italic;
-}
-
-/* --- VIEW SWAPPING (must be at the end) --- */
+/* ==========================================================================
+   3. VIEW SWAPPING & SUB-LINKS LAYOUT
+   ========================================================================== */
 .view-panel {
   display: flex;
   flex-direction: column;
@@ -400,42 +304,19 @@
   to { opacity: 1; transform: translateX(0); }
 }
 
-/* --- Topic list styling --- */
-.topic-list-container {
+#topic-selector-view {
+  justify-content: flex-start;
+  gap: 24px;
+}
+
+.topic-header-row {
   display: flex;
-  flex-direction: column;
-  gap: 12px;
-  overflow-y: auto;
-  max-height: 250px;
-  margin-top: 8px;
+  align-items: center;
+  gap: 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+  padding-bottom: 16px;
 }
 
-.topic-sub-link {
-  font-size: 18px;
-  font-weight: 600;
-  color: #ffffff;
-  text-decoration: none;
-  padding: 12px 16px;
-  background-color: rgba(255, 255, 255, 0.1);
-  border-radius: 6px;
-  transition: background-color 0.2s ease, transform 0.2s ease;
-}
-
-.topic-sub-link:hover {
-  background-color: rgba(255, 255, 255, 0.2);
-  transform: translateX(4px);
-}
-
-.no-topics-msg {
-  font-size: 18px;
-  font-weight: 500;
-  color: #ffffff;
-  opacity: 0.8;
-  margin-top: 16px !important;
-  font-style: italic;
-}
-
-/* --- Return button (dark/light mode compatible) --- */
 .circle-return-btn {
   display: flex;
   align-items: center;
@@ -457,10 +338,261 @@
   color: var(--sl-color-bg);
 }
 
-.topic-header-row {
+.topic-list-container {
   display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
+  overflow-x: hidden; /* Prevents horizontal layout leaking on extra long names */
+  max-height: 250px;
+  margin-top: 8px;
+}
+
+/* Uniform layout configurations across old single views and new standalone dashboards */
+.topic-sub-link,
+.topic-sub-link--desktop,
+.topic-sub-link--mobile {
+  font-size: 18px;
+  font-weight: 600;
+  color: #ffffff;
+  text-decoration: none;
+  padding: 12px 16px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+  white-space: normal;       /* Safe line wrapping for long custom text strings */
+  overflow-wrap: break-word; /* Prevents word fragmentation across bounds */
+  display: block;
+}
+
+.topic-sub-link:hover,
+.topic-sub-link--desktop:hover,
+.topic-sub-link--mobile:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+  transform: translateX(4px);
+}
+
+.no-topics-msg {
+  font-size: 18px;
+  font-weight: 500;
+  color: #ffffff;
+  opacity: 0.8;
+  margin-top: 16px !important;
+  text-align: left;
+  font-style: italic;
+}
+
+/* ==========================================================================
+   4. COURSE SELECTOR — INDEPENDENT DESKTOP/MOBILE VIEWPORTS
+   ========================================================================== */
+
+/* --- PC DASHBOARD WORKSPACE (≥900px) --- */
+@media (min-width: 900px) {
+  .selector-dashboard {
+    display: grid !important;
+    grid-template-columns: 1fr 420px !important;
+    gap: 40px;
+    max-width: 1200px;
+    margin: 40px auto 0 auto;
+    padding: 0 40px;
+    align-items: start;
+  }
+
+  .left-main-panel {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .right-purple-panel-pc {
+    display: flex !important;
+    flex-direction: column;
+    background-color: #A865B5;
+    border-radius: 8px;
+    padding: 40px;
+    min-height: 400px;
+    color: #ffffff;
+    box-shadow: 0 4px 20px rgba(168, 101, 181, 0.15);
+  }
+
+  #desktop-topics-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 20px;
+    overflow-y: auto;
+    max-height: 450px;
+    padding-right: 8px;
+  }
+
+  /* Custom inner workspace scrollbar configuration */
+  #desktop-topics-list::-webkit-scrollbar {
+    width: 6px;
+  }
+  #desktop-topics-list::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  #desktop-topics-list::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.3);
+    border-radius: 3px;
+  }
+
+  /* Completely suppress specific mobile wrappers on desktop views */
+  .selector-dashboard .bottom-sheet,
+  .selector-dashboard .bottom-sheet-backdrop {
+    display: none !important;
+  }
+}
+
+/* --- MOBILE SELECTOR DASHBOARD LAYOUT (≤899px) --- */
+@media (max-width: 899px) {
+  .selector-dashboard {
+    display: block !important;
+    width: 100%;
+    padding: 0 20px;
+    margin: 20px auto 0 auto;
+  }
+
+  .right-purple-panel-pc {
+    display: none !important;
+  }
+
+  /* Scoped specifically to the course selector layout layer */
+  .selector-dashboard .bottom-sheet-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.6);
+    z-index: 9999;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+
+  .selector-dashboard .bottom-sheet-backdrop.active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .selector-dashboard .bottom-sheet {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    max-height: 75vh;
+    background-color: #1a1a1a;
+    border-top: 3px solid #A865B5;
+    border-radius: 24px 24px 0 0;
+    z-index: 10000;
+    transform: translateY(100%);
+    transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.5);
+  }
+
+  .selector-dashboard .bottom-sheet.active {
+    transform: translateY(0);
+  }
+
+  .selector-dashboard .bottom-sheet-handle {
+    width: 40px;
+    height: 5px;
+    background-color: rgba(255, 255, 255, 0.3);
+    border-radius: 3px;
+    margin: 12px auto 8px auto;
+    flex-shrink: 0;
+    cursor: grab;
+  }
+
+  .selector-dashboard .bottom-sheet-content {
+    overflow-y: auto;
+    padding: 0 24px 40px 24px;
+    flex-grow: 1;
+  }
+
+  .selector-dashboard .bottom-sheet-content::-webkit-scrollbar {
+    width: 6px;
+  }
+  .selector-dashboard .bottom-sheet-content::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .selector-dashboard .bottom-sheet-content::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.15);
+    border-radius: 3px;
+  }
+}
+
+/* --- DYNAMIC COURSE SELECTOR TRIGGER LINKS --- */
+.course-links-grid {
+  display: flex;
+  flex-direction: column;
+  margin-top: 24px;
+}
+
+.course-select-trigger {
+  font-size: 20px;
+  font-weight: 500;
+  color: var(--sl-color-white);
+  text-decoration: none;
+  padding: 18px 0;
+  border-bottom: 1px solid var(--sl-color-gray-5);
+  transition: color 0.2s ease, padding 0.2s ease;
+  position: relative;
+  display: inline-flex;
   align-items: center;
-  gap: 16px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
-  padding-bottom: 16px;
+  cursor: pointer;
+}
+
+/* ─── DEFENSIVE STYLING FOR MOBILE BOTTOM SHEET ─── */
+
+/* 1. Complete absolute concealment on PC/Desktop layout */
+.mobile-sheet,
+.mobile-backdrop {
+  display: none !important;
+}
+
+/* 2. Enable, position, and animate only on Phone & Tablet screens */
+@media (max-width: 899px) {
+  .mobile-backdrop {
+    display: block !important;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 9998;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+  
+  .mobile-backdrop.active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .mobile-sheet {
+    display: flex !important;
+    flex-direction: column;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    max-height: 75vh;
+    background-color: #1e1131; /* Matches your core application background */
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+    z-index: 9999;
+    transform: translateY(100%);
+    transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+    padding: 24px;
+    box-sizing: border-box;
+  }
+
+  .mobile-sheet.active {
+    transform: translateY(0);
+  }
 }

@@ -2,8 +2,9 @@
 
 /* ─── 1. ANTI-NESTING STARLIGHT GLOBAL OVERRIDES ─── */
 
-/* Collapse Starlight's native grid spacing only when the custom lesson UI is present */
-body:has(.lesson-ui-wrapper) {
+/* Collapse Starlight's native grid spacing when the custom lesson UI or course selector UI is present */
+body:has(.lesson-ui-wrapper),
+body:has(.course-selector-ui-wrapper) {
   --sl-content-width: 100% !important;
   --sl-sidebar-width: 0px !important; /* Reclaims the massive empty left gap */
   --sl-nav-height: 0px !important;    /* Reclaims the top gap */
@@ -11,12 +12,15 @@ body:has(.lesson-ui-wrapper) {
 
 /* Correctly hide Starlight's default Header and Left Sidebar */
 body:has(.lesson-ui-wrapper) .header, 
-body:has(.lesson-ui-wrapper) .sidebar-pane {
+body:has(.lesson-ui-wrapper) .sidebar-pane,
+body:has(.course-selector-ui-wrapper) .header, 
+body:has(.course-selector-ui-wrapper) .sidebar-pane {
   display: none !important;
 }
 
-/* Ensure the custom wrapper scales correctly */
-.lesson-ui-wrapper {
+/* Ensure the custom full-bleed wrappers scale correctly */
+.lesson-ui-wrapper,
+.course-selector-ui-wrapper {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
@@ -31,7 +35,12 @@ body:has(.lesson-ui-wrapper) .page,
 body:has(.lesson-ui-wrapper) .main-frame, 
 body:has(.lesson-ui-wrapper) .content-panel, 
 body:has(.lesson-ui-wrapper) main,
-body:has(.lesson-ui-wrapper) .sl-markdown-content {
+body:has(.lesson-ui-wrapper) .sl-markdown-content,
+body:has(.course-selector-ui-wrapper) .page, 
+body:has(.course-selector-ui-wrapper) .main-frame, 
+body:has(.course-selector-ui-wrapper) .content-panel, 
+body:has(.course-selector-ui-wrapper) main,
+body:has(.course-selector-ui-wrapper) .sl-markdown-content {
   padding: 0 !important;
   max-width: 100% !important;
   margin: 0 !important;
@@ -182,7 +191,7 @@ starlight-toc h2::after {
   z-index: 9999; 
 }
 
-.btn-practice, .btn-return-selector {
+.btn-practice, .btn-return-selector, .btn-sidebar-toggle {
   background-color: #A865B5;
   color: #ffffff;
   border: none;
@@ -202,50 +211,94 @@ starlight-toc h2::after {
   gap: 10px;
 }
 
-.btn-return-selector {
+.btn-return-selector, .btn-sidebar-toggle {
   width: 48px;
   height: 48px;
   border-radius: 50%;
 }
 
-.btn-practice:hover, .btn-return-selector:hover {
+.btn-practice:hover, .btn-return-selector:hover, .btn-sidebar-toggle:hover {
   background-color: #914ba0;
   transform: translateY(-3px);
 }
 
-/* Responsive adjustments */
+/* Desktop behaviors for Lesson Viewports */
+@media (min-width: 1025px) {
+  #lesson-bottom-sheet,
+  #lesson-sheet-backdrop,
+  .btn-sidebar-toggle {
+    display: none !important;
+  }
+}
+
+/* Mobile/Tablet responsive viewports for Lesson Viewports */
 @media (max-width: 1024px) {
   .lesson-container { grid-template-columns: 1fr; }
-  .lesson-sidebar { position: relative; top: 0; height: auto; }
+  .lesson-container > .lesson-sidebar { display: none !important; } /* Hide the inline desktop sidebar */
   .lesson-actions-overlay { bottom: 20px; right: 20px; }
-}
 
-.katex {
-  font: sans-serif; /* ให้โครงสร้างดึงคุณสมบัติฟอนต์คณิตศาสตร์จาก cdn */
-  font-size: 1.1em !important; /* ปรับขนาดให้พอดีและอ่านง่ายร่วมกับภาษาไทย */
-  white-space: nowrap; /* ห้ามตัดบรรทัดกลางคันภายในตัวสูตรเดียว */
-  line-height: 1.2;
-}
+  /* ─── STRICT INDEPENDENT LESSON VIEWPORT MOBILE BOTTOM SHEET ─── */
+  #lesson-sheet-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.6);
+    z-index: 9999;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
 
-/* บล็อกสูตรคณิตศาสตร์กึ่งกลาง ($$...$$) ต้องเว้นระยะบนล่างให้สมดุล */
-.katex-display {
-  display: block;
-  margin: 1.5rem 0 !important;
-  overflow-x: auto; /* หากสูตรยาวเกินไปบนหน้าจอมือถือ ให้เลื่อนซ้ายขวาได้ ไม่ให้ล้นทะลุจอ */
-  overflow-y: hidden;
-  padding: 0.5rem 0;
-}
+  #lesson-sheet-backdrop.active {
+    opacity: 1;
+    pointer-events: auto;
+  }
 
-/* ล้างค่าสไตล์แปลกปลอมที่หลุดมาจาก Markdown Compiler */
-.katex-html {
-  display: inline-block;
-}
+  #lesson-bottom-sheet {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    max-height: 75vh;
+    background-color: #1a1a1a;
+    border-top: 3px solid #A865B5;
+    border-radius: 24px 24px 0 0;
+    z-index: 10000;
+    transform: translateY(100%);
+    transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.5);
+  }
 
-/* แก้ไขสัญกรณ์เศษส่วน (\frac) และตัวห้อยลิมิตให้ซ้อนแนวตั้งตรงกันสวยงาม */
-.katex .vlist-t {
-  border-collapse: collapse;
-}
+  #lesson-bottom-sheet.active {
+    transform: translateY(0);
+  }
 
-.katex .boxpad {
-  padding: 0;
+  #lesson-bottom-sheet .bottom-sheet-handle {
+    width: 40px;
+    height: 5px;
+    background-color: rgba(255, 255, 255, 0.3);
+    border-radius: 3px;
+    margin: 12px auto 8px auto;
+    flex-shrink: 0;
+    cursor: grab;
+  }
+
+  #lesson-bottom-sheet .bottom-sheet-content {
+    overflow-y: auto;
+    padding: 0 24px 40px 24px;
+    flex-grow: 1;
+  }
+
+  #lesson-bottom-sheet .lesson-sidebar {
+    display: flex !important;
+    position: relative;
+    top: 0;
+    height: auto;
+    background-color: transparent;
+    padding: 0;
+  }
 }
