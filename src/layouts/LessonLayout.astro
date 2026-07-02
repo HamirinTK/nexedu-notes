@@ -58,7 +58,7 @@ const isWelcome = pathSegments.length === 0 || (pathSegments.length === 1 && pat
 
 // Course selector pages ("/en", "/th", "/en/index") have exactly 1 segment
 const isSelector = pathSegments.length === 1 || (pathSegments.length === 2 && pathSegments[1] === 'index');
-
+const isPractice = pathSegments[pathSegments.length - 1] === 'practice';
 const cleanPath = pathSegments.join('/');
 ---
 
@@ -69,6 +69,8 @@ const cleanPath = pathSegments.join('/');
     <CustomHeader />
     <main class="course-selector-main-content"><slot /></main>
   </div>
+) : isPractice ? (
+  <slot />
 ) : (
   <div class="lesson-ui-wrapper">
     <CustomHeader />
@@ -134,7 +136,10 @@ const cleanPath = pathSegments.join('/');
   function setupLessonUI() {
     document.body.style.overflow = '';
 
-    document.getElementById('practice-btn')?.addEventListener('click', () => alert('Coming soon!'));
+    document.getElementById('practice-btn')?.addEventListener('click', () => {
+      const path = window.location.pathname.replace(/\/+$/, '');
+      window.location.href = `${path}/practice`;
+    });    
     document.getElementById('return-selector-btn')?.addEventListener('click', () => {
       const path = window.location.pathname.split('/').filter(Boolean)[0] || '';
       window.location.href = `/${path}/`;

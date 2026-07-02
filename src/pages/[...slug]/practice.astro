@@ -1,0 +1,31 @@
+---
+// src/pages/[...slug]/practice.astro
+import { getCollection } from 'astro:content';
+import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
+import Practice from '../../components/practice.astro';
+
+export async function getStaticPaths() {
+  const quizEntries = await getCollection('quiz');
+
+  return quizEntries.map((entry) => {
+    // Replacement chain handling any format variations from the glob loader
+    const cleanSlug = entry.id
+      .replace(/^src\/content\/docs\//, '') // Strip legacy prefix if it exists
+      .replace(/\.json$/, '')               // Discard the .json extension if present
+      .replace(/\/practice\/index$/, '')    // Strip trailing /practice/index 
+      .replace(/\/practice$/, '');          // Fallback: strip /practice if index wasn't there
+
+
+    return {
+      params: { slug: cleanSlug },   // Correctly maps to -> /en/math/test/practice
+      props: { quizData: entry.data },
+    };
+  });
+}
+
+const { quizData } = Astro.props;
+---
+
+<StarlightPage frontmatter={{ title: quizData.meta.practiceTitle }} hasSidebar={false}>
+  <Practice meta={quizData.meta} questions={quizData.questions} />
+</StarlightPage>

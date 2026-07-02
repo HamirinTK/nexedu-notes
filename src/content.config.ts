@@ -7,13 +7,21 @@ export const collections = {
     // 1. Starlight loader continues to handle the .mdx pages
     docs: defineCollection({ loader: docsLoader(), schema: docsSchema() }),
     
-    // 2. Your existing data collection for metadata
+    // 2. Metadata JSON that sits next to lesson pages
+    //    Excludes anything inside a "practice" folder — that belongs to `quiz`.
     docsMeta: defineCollection({
-        loader: glob({ pattern: 'src/content/docs/**/*.json' })
+        loader: glob({
+            base: './src/content/docs',
+            pattern: ['**/*.json', '!**/practice/**']
+        })
     }),
 
-    // 3. NEW: The collection for your quiz JSON files!
+    // 3. Quiz JSON (lives under src/content/docs), but only matches
+    //    JSON files sitting inside a "practice" folder.
     quiz: defineCollection({
-        loader: glob({ pattern: 'src/content/quiz/**/*.json' })
+        loader: glob({ 
+            base: './src/content/docs',
+            pattern: '**/practice/*.json'
+        })
     }),
 };
