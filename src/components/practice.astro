@@ -1,0 +1,439 @@
+---
+// src/components/practice.astro
+import '../styles/practice.css';
+
+export type Blank = { options: string[]; answer: string };
+export type Question = {
+  id: string;
+  type: 'multiple-choice' | 'fill-blank' | 'match-pairs';
+  prompt: string;
+  image: string | null;
+  hint: string | null;
+  choices?: string[];
+  answerIndex?: number;
+  blanks?: Record<string, Blank>;
+  pairs?: { left: string; right: string }[];
+};
+
+export interface Props {
+  meta: {
+    practiceTitle: string;
+    courseTitle: string;
+    coverImage: string | null;
+    topicPath: string[];
+  };
+  questions: Question[];
+}
+
+const { meta, questions } = Astro.props;
+
+// This bundles your JSON data so the interactive quiz can use it
+const clientData = { questions };
+
+const segments = Astro.url.pathname.split('/').filter(Boolean);
+const lessonHref = segments.length > 1 ? `/${segments.slice(0, -1).join('/')}/` : '/';
+
+// Reusable SVG icons to keep the HTML clean
+const SVGS = {
+  placeholder: `<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" /><path d="M21 15l-5-5L5 21" /></svg>`,
+  prevArrowDesk: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M15 18l-6-6 6-6"/></svg>`,
+  nextArrowDesk: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M9 18l6-6-6-6"/></svg>`,
+  prevArrowMob: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M15 18l-6-6 6-6"/></svg>`,
+  nextArrowMob: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M9 18l6-6-6-6"/></svg>`,
+};
+---
+
+<practice-quiz data-quiz={JSON.stringify(clientData)} class="lesson-ui-wrapper block">
+  <div class="lesson-container practice-page-container">
+    
+    <aside class="lesson-sidebar" id="lesson-sidebar-desktop">
+      <div class="sidebar-path">
+        {meta.topicPath.map((crumb, i) => (
+          <>
+            {i > 0 && <span class="path-separator"> / </span>}
+            <span>{crumb}</span>
+          </>
+        ))}
+      </div>
+      <h2 class="sidebar-title">{meta.courseTitle}</h2>
+      <div class="sidebar-image-placeholder">
+        {meta.coverImage ? (
+          <img src={meta.coverImage} alt={meta.courseTitle} />
+        ) : (
+          <Fragment set:html={SVGS.placeholder} />
+        )}
+      </div>
+      <div class="sidebar-tree-container">
+        <span class="sidebar-tree-label">In this set</span>
+        <div class="topic-tree-box">
+          <ul class="tree-list" id="sidebar-tree-desktop"></ul>
+        </div>
+      </div>
+    </aside>
+
+    <main class="practice-content">
+      <div class="practice-heading">
+        <span class="practice-progress-label" id="practice-progress-label">Question 1 of {questions.length}</span>
+        <h1 class="lesson-content-title">{meta.practiceTitle}</h1>
+      </div>
+
+      <div class="question-nav-panel" id="qnav-panel">
+        <button class="qnav-arrow prev-btn" id="qnav-prev-desktop" aria-label="Previous question" set:html={SVGS.prevArrowDesk} />
+        <div class="question-nav-grid" id="qnav-grid"></div>
+        <button class="qnav-arrow next-btn" id="qnav-next-desktop" aria-label="Next question" set:html={SVGS.nextArrowDesk} />
+      </div>
+
+      <div class="qnav-mobile-strip" id="qnav-mobile-strip">
+        <button class="qnav-arrow prev-btn" id="qnav-prev-mobile" aria-label="Previous question" set:html={SVGS.prevArrowMob} />
+        <div class="qnav-scroll" id="qnav-scroll"></div>
+        <button class="qnav-arrow next-btn" id="qnav-next-mobile" aria-label="Next question" set:html={SVGS.nextArrowMob} />
+      </div>
+
+      <section class="question-stage" id="question-stage" aria-live="polite"></section>
+
+      <div class="question-footer-nav">
+        <button class="footer-nav-btn secondary prev-btn" id="footer-prev">
+          <Fragment set:html={SVGS.prevArrowMob} /> Previous
+        </button>
+        <button class="footer-nav-btn next-btn" id="footer-next">
+          Next <Fragment set:html={SVGS.nextArrowMob} />
+        </button>
+      </div>
+    </main>
+  </div>
+
+  <div class="lesson-actions-overlay">
+    <a href={lessonHref} class="btn-return-selector" id="btn-return-selector" title="Back to course">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+    </a>
+    <button class="btn-sidebar-toggle" id="btn-sidebar-toggle" title="Course map">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+  </div>
+
+  <div id="lesson-sheet-backdrop"></div>
+  <div id="lesson-bottom-sheet">
+    <div class="bottom-sheet-handle"></div>
+    <div class="bottom-sheet-content">
+      <aside class="lesson-sidebar">
+        <div class="sidebar-path">
+          {meta.topicPath.map((crumb, i) => (
+            <>
+              {i > 0 && <span class="path-separator"> / </span>}
+              <span>{crumb}</span>
+            </>
+          ))}
+        </div>
+        <h2 class="sidebar-title">{meta.courseTitle}</h2>
+        <div class="sidebar-tree-container">
+          <span class="sidebar-tree-label">In this set</span>
+          <div class="topic-tree-box">
+            <ul class="tree-list" id="sidebar-tree-mobile"></ul>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+</practice-quiz>
+
+<script>
+  class PracticeQuiz extends HTMLElement {
+    // ─── 1. TYPESCRIPT DECLARATIONS (This fixes the 117 errors) ───
+    data: any;
+    questions: any[];
+    state: any;
+    typeLabels: Record<string, string>;
+    
+    stageEl!: HTMLElement;
+    progressLabel!: HTMLElement;
+    qnavGrid!: HTMLElement;
+    qnavScroll!: HTMLElement;
+    prevBtns!: NodeListOf<HTMLButtonElement>;
+    nextBtns!: NodeListOf<HTMLButtonElement>;
+    footerNext!: HTMLElement;
+
+    constructor() {
+      super();
+      // Load the JSON data
+      this.data = JSON.parse(this.dataset.quiz || '{}');
+      this.questions = this.data.questions || [];
+      
+      // Setup tracking variables
+      this.state = {
+        current: 0,
+        answered: new Set(),
+        mcq: {},
+        blank: {},
+        match: {},
+        shuffledRight: {},
+        hintOpen: new Set(),
+        revealed: new Set(),
+        armedMatch: null,
+      };
+
+      this.typeLabels = {
+        'multiple-choice': 'Select the answer',
+        'fill-blank': 'Fill in the blank',
+        'match-pairs': 'Match the pairs',
+      };
+    }
+
+    connectedCallback() {
+      if (!this.questions.length) return;
+      this.cacheDOM();
+      this.bindEvents();
+      this.render();
+    }
+
+    cacheDOM() {
+      this.stageEl = this.querySelector('#question-stage') as HTMLElement;
+      this.progressLabel = this.querySelector('#practice-progress-label') as HTMLElement;
+      this.qnavGrid = this.querySelector('#qnav-grid') as HTMLElement;
+      this.qnavScroll = this.querySelector('#qnav-scroll') as HTMLElement;
+      this.prevBtns = this.querySelectorAll('.prev-btn');
+      this.nextBtns = this.querySelectorAll('.next-btn');
+      this.footerNext = this.querySelector('#footer-next') as HTMLElement;
+    }
+
+    bindEvents() {
+      this.addEventListener('click', (e: Event) => this.handleClick(e));
+      this.addEventListener('change', (e: Event) => this.handleChange(e));
+    }
+
+    escapeHtml(str: string) {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    shuffle(arr: any[]) {
+      const a = [...arr];
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    goTo(index: number) {
+      this.state.current = Math.max(0, Math.min(this.questions.length - 1, index));
+      this.state.armedMatch = null;
+      this.render();
+    }
+
+    handleClick(e: Event) {
+      const target = e.target as HTMLElement;
+      if (!target) return;
+
+      const q = this.questions[this.state.current];
+
+      // Multiple Choice Clicks
+      const mcqBtn = target.closest('.mcq-choice') as HTMLElement;
+      if (mcqBtn) {
+        this.state.mcq[q.id] = parseInt(mcqBtn.dataset.choice || '0', 10);
+        this.state.answered.add(q.id);
+        return this.render();
+      }
+
+      // Match Pairs Clicks
+      const matchBtn = target.closest('.match-item') as HTMLElement;
+      if (matchBtn) {
+        const side = matchBtn.dataset.side;
+        const idx = parseInt(matchBtn.dataset.idx || '0', 10);
+        this.state.match[q.id] = this.state.match[q.id] || {};
+
+        if (!this.state.armedMatch) {
+          this.state.armedMatch = { qid: q.id, side, idx };
+        } else if (this.state.armedMatch.qid === q.id && this.state.armedMatch.side !== side) {
+          const leftIdx = side === 'left' ? idx : this.state.armedMatch.idx;
+          const rightIdx = side === 'right' ? idx : this.state.armedMatch.idx;
+          this.state.match[q.id][leftIdx] = rightIdx;
+          this.state.answered.add(q.id);
+          this.state.armedMatch = null;
+        } else {
+          this.state.armedMatch = (this.state.armedMatch.idx === idx && this.state.armedMatch.side === side) 
+            ? null 
+            : { qid: q.id, side, idx };
+        }
+        return this.render();
+      }
+
+      // Hint & Show Answer Clicks
+      if (target.closest('.hint-btn')) {
+        this.state.hintOpen.has(q.id) ? this.state.hintOpen.delete(q.id) : this.state.hintOpen.add(q.id);
+        return this.render();
+      }
+      if (target.closest('.show-answer-btn')) {
+        this.state.revealed.add(q.id);
+        this.state.answered.add(q.id);
+        return this.render();
+      }
+
+      // Navigation Clicks (Next/Prev/Jump)
+      const jumpEl = target.closest('[data-jump]') as HTMLElement;
+      if (jumpEl) return this.goTo(parseInt(jumpEl.dataset.jump || '0', 10));
+      
+      if (target.closest('.prev-btn')) return this.goTo(this.state.current - 1);
+      
+      if (target.closest('.next-btn')) {
+        if (this.state.current === this.questions.length - 1) {
+          const returnBtn = this.querySelector('#btn-return-selector') as HTMLAnchorElement;
+          if (returnBtn) window.location.href = returnBtn.href; 
+        } else {
+          this.goTo(this.state.current + 1);
+        }
+      }
+    }
+
+    // Fill Blank Dropdowns
+    handleChange(e: Event) {
+      const target = e.target as HTMLSelectElement;
+      if (target && target.classList.contains('blank-select')) {
+        const q = this.questions[this.state.current];
+        this.state.blank[q.id] = this.state.blank[q.id] || {};
+        this.state.blank[q.id][target.dataset.blank || ''] = target.value;
+        this.state.answered.add(q.id);
+        this.render();
+      }
+    }
+
+    renderMCQ(q: any) {
+      const sel = this.state.mcq[q.id];
+      const isRevealed = this.state.revealed.has(q.id);
+      return `<div class="mcq-grid">
+        ${q.choices.map((choice: string, i: number) => {
+          let cls = '';
+          if (isRevealed && i === q.answerIndex) cls = 'is-correct';
+          else if (isRevealed && i === sel && i !== q.answerIndex) cls = 'is-incorrect';
+          else if (!isRevealed && i === sel) cls = 'is-selected';
+          return `<button class="mcq-choice ${cls}" data-choice="${i}">${this.escapeHtml(choice)}</button>`;
+        }).join('')}
+      </div>`;
+    }
+
+    renderFillBlank(q: any) {
+      const state = this.state.blank[q.id] || {};
+      const isRevealed = this.state.revealed.has(q.id);
+      const html = q.prompt.replace(/\{\{(\w+)\}\}/g, (_: string, key: string) => {
+        const blank = q.blanks[key];
+        const currentVal = state[key] || '';
+        const correct = isRevealed && currentVal === blank.answer;
+        const incorrect = isRevealed && currentVal && currentVal !== blank.answer;
+        const opts = ['<option value="" disabled ' + (currentVal ? '' : 'selected') + '>choose…</option>']
+          .concat(blank.options.map((o: string) => `<option value="${this.escapeHtml(o)}" ${o === currentVal ? 'selected' : ''}>${this.escapeHtml(o)}</option>`));
+        return `<select class="blank-select ${correct ? 'is-correct' : ''} ${incorrect ? 'is-incorrect' : ''}" data-blank="${key}">${opts.join('')}</select>`;
+      });
+      return `<p class="fillblank-prompt">${html}</p>`;
+    }
+
+    renderMatchPairs(q: any) {
+      const pairs = q.pairs;
+      const state = this.state.match[q.id] || {};
+      const isRevealed = this.state.revealed.has(q.id);
+      if (!this.state.shuffledRight[q.id]) this.state.shuffledRight[q.id] = this.shuffle(pairs.map((_: any, i: number) => i));
+      const rightOrder = this.state.shuffledRight[q.id];
+
+      const leftHtml = pairs.map((p: any, i: number) => {
+        const pairedWith = state[i];
+        const isArmed = !!(this.state.armedMatch && this.state.armedMatch.qid === q.id && this.state.armedMatch.side === 'left' && this.state.armedMatch.idx === i);
+        let cls = isArmed ? 'is-armed' : (pairedWith !== undefined ? 'is-paired' : '');
+        if (isRevealed) cls = pairedWith === i ? 'is-correct' : (pairedWith !== undefined ? 'is-incorrect' : '');
+        const badge = pairedWith !== undefined ? `<span class="pair-badge">${i + 1}</span>` : '';
+        return `<button class="match-item ${cls}" data-side="left" data-idx="${i}">${badge}${this.escapeHtml(p.left)}</button>`;
+      }).join('');
+
+      const rightHtml = rightOrder.map((origIdx: number) => {
+        const leftIdxKey = Object.keys(state).find(k => state[+k] === origIdx);
+        const isArmed = !!(this.state.armedMatch && this.state.armedMatch.qid === q.id && this.state.armedMatch.side === 'right' && this.state.armedMatch.idx === origIdx);
+        let cls = isArmed ? 'is-armed' : (leftIdxKey !== undefined ? 'is-paired' : '');
+        if (isRevealed) cls = leftIdxKey !== undefined && +leftIdxKey === origIdx ? 'is-correct' : (leftIdxKey !== undefined ? 'is-incorrect' : '');
+        const badge = leftIdxKey !== undefined ? `<span class="pair-badge">${leftIdxKey !== undefined ? +leftIdxKey + 1 : ''}</span>` : '';
+        return `<button class="match-item ${cls}" data-side="right" data-idx="${origIdx}">${badge}${this.escapeHtml(pairs[origIdx].right)}</button>`;
+      }).join('');
+
+      return `<div class="match-columns"><div class="match-column">${leftHtml}</div><div class="match-column">${rightHtml}</div></div>`;
+    }
+
+    getFeedbackHtml(q: any) {
+      if (!this.state.revealed.has(q.id)) return '';
+      if (q.type === 'multiple-choice') {
+        return `<div class="answer-feedback correct">Correct answer: ${this.escapeHtml(q.choices[q.answerIndex])}</div>`;
+      }
+      if (q.type === 'fill-blank') {
+        const parts = Object.entries(q.blanks).map(([k, b]: [string, any]) => `${k}: ${b.answer}`);
+        return `<div class="answer-feedback correct">Correct answer${parts.length > 1 ? 's' : ''}: ${this.escapeHtml(parts.join(', '))}</div>`;
+      }
+      if (q.type === 'match-pairs') {
+        const parts = q.pairs.map((p: any) => `${p.left} → ${p.right}`);
+        return `<div class="answer-feedback correct">Correct pairs: ${this.escapeHtml(parts.join(' · '))}</div>`;
+      }
+      return '';
+    }
+
+    renderNav() {
+      const buildBtn = (i: number) => {
+        const isCurrent = i === this.state.current;
+        const isAnswered = this.state.answered.has(this.questions[i].id);
+        return `<button class="qnav-item ${isCurrent ? 'is-current' : ''} ${isAnswered ? 'is-answered' : ''}"
+                  data-jump="${i}" aria-label="Go to question ${i + 1}">${i + 1}</button>`;
+      };
+      
+      const btnsHtml = this.questions.map((_: any, i: number) => buildBtn(i)).join('');
+      this.qnavGrid.innerHTML = btnsHtml;
+      this.qnavScroll.innerHTML = btnsHtml;
+      
+      this.progressLabel.textContent = `Question ${this.state.current + 1} of ${this.questions.length}`;
+      
+      this.prevBtns.forEach(btn => btn.disabled = this.state.current === 0);
+      this.nextBtns.forEach(btn => btn.disabled = this.state.current === this.questions.length - 1);
+      
+      const isLast = this.state.current === this.questions.length - 1;
+      this.footerNext.innerHTML = isLast 
+        ? 'Finish <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>'
+        : 'Next <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M9 18l6-6-6-6"/></svg>';
+    }
+
+    render() {
+      const q = this.questions[this.state.current];
+      const hasHint = !!q.hint;
+      const hintIsOpen = this.state.hintOpen.has(q.id);
+
+      let body = '';
+      if (q.type === 'multiple-choice') body = this.renderMCQ(q);
+      else if (q.type === 'fill-blank') body = this.renderFillBlank(q);
+      else if (q.type === 'match-pairs') body = this.renderMatchPairs(q);
+
+      const imageBlock = q.image 
+        ? `<div class="question-image"><img src="${q.image}" alt="" /></div>`
+        : `<div class="question-image is-placeholder">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/>
+            </svg>
+            <span>No image for this question</span>
+          </div>`;
+
+      this.stageEl.innerHTML = `
+        <span class="question-type-tag">${this.typeLabels[q.type]}</span>
+        ${imageBlock}
+        ${q.type !== 'fill-blank' ? `<p class="question-prompt">${this.escapeHtml(q.prompt)}</p>` : ''}
+        <div class="question-body">${body}</div>
+        <div class="question-controls">
+          <button class="control-btn hint-btn ${hintIsOpen ? 'is-active' : ''}" ${hasHint ? '' : 'disabled'}>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/></svg>
+            Hint
+          </button>
+          <button class="control-btn show-answer-btn">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>
+            Show me
+          </button>
+          <div class="hint-panel ${hintIsOpen ? 'is-open' : ''}">${hasHint ? this.escapeHtml(q.hint) : ''}</div>
+          ${this.getFeedbackHtml(q)}
+        </div>
+      `;
+
+      this.renderNav();
+    }
+  }
+
+  customElements.define('practice-quiz', PracticeQuiz);
+</script>

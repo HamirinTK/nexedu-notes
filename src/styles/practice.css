@@ -1,0 +1,572 @@
+/* src/styles/practice.css
+   Practice page. Import AFTER lesson.css:
+     import '../styles/lesson.css';
+     import '../styles/practice.css';
+   The outer wrapper on practice.astro reuses the `.lesson-ui-wrapper` class
+   on purpose so it inherits the exact same anti-nesting Starlight overrides
+   (hides native header/sidebar, collapses the grid) already defined in
+   lesson.css — no duplication needed. `.lesson-container` / `.lesson-sidebar`
+   are reused as-is so the sidebar is visually identical to the lesson page. */
+
+/* ─── 0. PURPLE SHADE TOKENS (scoped to this page only) ─── */
+.practice-content {
+  --pp-100: #f4ecf6;   /* pale tint — placeholders, empty states        */
+  --pp-200: #e6d3ec;   /* subtle borders, unselected chips              */
+  --pp-400: #c79bd4;   /* secondary accents, disabled hint text         */
+  --pp-500: #A865B5;   /* brand purple — primary actions                */
+  --pp-600: #914ba0;   /* hover shade (matches lesson.css btn hover)    */
+  --pp-700: #6f3a7c;   /* pressed / active-strong                       */
+  --pp-correct: #3fae6a;
+  --pp-incorrect: #d8556b;
+}
+
+/* ─── 1. PAGE CONTENT SHELL ─── */
+.practice-content {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  min-width: 0;
+  padding-bottom: 140px;
+}
+
+.practice-heading {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.practice-heading h1 {
+  font-size: 32px !important;
+  font-weight: 800 !important;
+  margin: 0 !important;
+}
+
+.practice-progress-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--pp-500);
+  letter-spacing: 0.03em;
+}
+
+/* ─── 2. QUESTION SELECTOR PANEL (grid + jump arrows) ─── */
+.question-nav-panel {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background-color: var(--pp-100);
+  border-radius: 14px;
+  padding: 14px 16px;
+  box-sizing: border-box;
+}
+
+.qnav-arrow {
+  flex-shrink: 0;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: none;
+  background-color: #ffffff;
+  color: var(--pp-500);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(168, 101, 181, 0.18);
+  transition: transform 0.15s ease, background-color 0.15s ease;
+}
+
+.qnav-arrow:hover {
+  background-color: var(--pp-500);
+  color: #ffffff;
+  transform: translateY(-2px);
+}
+
+.qnav-arrow:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  transform: none;
+  background-color: #ffffff;
+  color: var(--pp-500);
+}
+
+.question-nav-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+}
+
+.qnav-item {
+  position: relative;
+  height: 40px;
+  border-radius: 10px;
+  border: 2px solid transparent;
+  background-color: #ffffff;
+  color: var(--pp-700);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  transition: color 0.2s ease, padding 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
+}
+
+/* Ket-notation hover — same visual language as CourseSelector / homepage links */
+.qnav-item::before,
+.qnav-item::after {
+  color: #ffffff;
+  opacity: 0;
+  font-weight: 700;
+  font-size: 11px;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  position: absolute;
+}
+.qnav-item::before {
+  content: "|";
+  left: 3px;
+  transform: translateX(-4px);
+}
+.qnav-item::after {
+  content: "⟩";
+  right: 3px;
+  transform: translateX(4px);
+}
+.qnav-item:hover {
+  background-color: var(--pp-600);
+  color: #ffffff;
+}
+.qnav-item:hover::before,
+.qnav-item:hover::after {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.qnav-item.is-current {
+  background-color: var(--pp-500);
+  color: #ffffff;
+  border-color: var(--pp-700);
+}
+
+.qnav-item.is-answered:not(.is-current)::after {
+  content: "✓";
+  opacity: 1;
+  position: static;
+  margin-left: 4px;
+  color: var(--pp-500);
+  font-size: 12px;
+}
+.qnav-item.is-answered:not(.is-current):hover::after {
+  content: "⟩";
+  color: #ffffff;
+}
+
+/* ─── 3. QUESTION CARD / STAGE ─── */
+.question-stage {
+  background-color: #ffffff;
+  border: 1px solid var(--pp-200);
+  border-radius: 20px;
+  padding: 32px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  box-shadow: 0 4px 24px rgba(168, 101, 181, 0.08);
+}
+
+.question-type-tag {
+  align-self: flex-start;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--pp-600);
+  background-color: var(--pp-100);
+  padding: 5px 12px;
+  border-radius: 20px;
+}
+
+/* Image placeholder — shown whenever a question has no image */
+.question-image {
+  width: 100%;
+  max-height: 280px;
+  border-radius: 14px;
+  overflow: hidden;
+  background-color: var(--pp-100);
+}
+.question-image img {
+  width: 100%;
+  height: 100%;
+  max-height: 280px;
+  object-fit: cover;
+  display: block;
+}
+.question-image.is-placeholder {
+  height: 160px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: var(--pp-400);
+  border: 2px dashed var(--pp-200);
+  background-color: #fbf7fc;
+}
+.question-image.is-placeholder svg {
+  width: 36px;
+  height: 36px;
+  opacity: 0.6;
+}
+.question-image.is-placeholder span {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.question-prompt {
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.4;
+  color: var(--sl-color-text, #1a1a1a);
+  margin: 0;
+}
+
+.question-body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ─── 4. MULTIPLE CHOICE (4-option) ─── */
+.mcq-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.mcq-choice {
+  position: relative;
+  text-align: left;
+  padding: 16px 20px;
+  border-radius: 12px;
+  border: 2px solid var(--pp-200);
+  background-color: #ffffff;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--sl-color-text, #1a1a1a);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: border-color 0.2s ease, background-color 0.2s ease, padding-left 0.2s ease;
+}
+
+.mcq-choice::before,
+.mcq-choice::after {
+  color: var(--pp-500);
+  opacity: 0;
+  font-weight: 700;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.mcq-choice::before { content: "|"; transform: translateX(-4px); }
+.mcq-choice::after  { content: "⟩"; transform: translateX(4px); margin-left: auto; }
+
+.mcq-choice:hover {
+  border-color: var(--pp-500);
+  background-color: var(--pp-100);
+}
+.mcq-choice:hover::before,
+.mcq-choice:hover::after {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.mcq-choice.is-selected {
+  border-color: var(--pp-500);
+  background-color: var(--pp-100);
+  font-weight: 700;
+}
+
+.mcq-choice.is-correct {
+  border-color: var(--pp-correct);
+  background-color: #eafaf1;
+}
+.mcq-choice.is-incorrect {
+  border-color: var(--pp-incorrect);
+  background-color: #fdecee;
+}
+
+/* ─── 5. FILL IN THE BLANK (dropdown) ─── */
+.fillblank-prompt {
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 2.1;
+  color: var(--sl-color-text, #1a1a1a);
+}
+
+.blank-select {
+  appearance: none;
+  -webkit-appearance: none;
+  border: none;
+  border-bottom: 3px solid var(--pp-500);
+  background-color: var(--pp-100);
+  color: var(--pp-700);
+  font-size: 16px;
+  font-weight: 700;
+  font-family: inherit;
+  padding: 4px 28px 4px 12px;
+  border-radius: 8px 8px 0 0;
+  margin: 0 4px;
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23A865B5' stroke-width='3'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 6px center;
+  background-size: 14px;
+  min-width: 70px;
+  transition: border-color 0.2s ease;
+}
+.blank-select:hover,
+.blank-select:focus {
+  border-color: var(--pp-700);
+  outline: none;
+}
+.blank-select.is-correct { border-color: var(--pp-correct); background-color: #eafaf1; }
+.blank-select.is-incorrect { border-color: var(--pp-incorrect); background-color: #fdecee; }
+
+/* ─── 6. MATCH PAIRS ─── */
+.match-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.match-column {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.match-item {
+  position: relative;
+  text-align: left;
+  padding: 14px 16px;
+  border-radius: 10px;
+  border: 2px solid var(--pp-200);
+  background-color: #ffffff;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--sl-color-text, #1a1a1a);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.match-item::before, .match-item::after {
+  color: var(--pp-500);
+  opacity: 0;
+  font-weight: 700;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.match-item::before { content: "|"; transform: translateX(-4px); }
+.match-item::after  { content: "⟩"; transform: translateX(4px); margin-left: auto; }
+.match-item:hover { border-color: var(--pp-500); background-color: var(--pp-100); }
+.match-item:hover::before, .match-item:hover::after { opacity: 1; transform: translateX(0); }
+
+.match-item.is-armed {
+  border-color: var(--pp-700);
+  background-color: var(--pp-200);
+}
+
+.match-item.is-paired {
+  border-color: var(--pp-500);
+  background-color: var(--pp-100);
+}
+.match-item.is-paired .pair-badge {
+  display: inline-flex;
+}
+
+.match-item.is-correct { border-color: var(--pp-correct); background-color: #eafaf1; }
+.match-item.is-incorrect { border-color: var(--pp-incorrect); background-color: #fdecee; }
+
+.pair-badge {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background-color: var(--pp-500);
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+/* ─── 7. HINT / SHOW ANSWER CONTROLS ─── */
+.question-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  border-top: 1px solid var(--pp-200);
+  padding-top: 20px;
+}
+
+.control-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border-radius: 24px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  border: 2px solid var(--pp-500);
+  background-color: #ffffff;
+  color: var(--pp-500);
+  transition: background-color 0.2s ease, color 0.2s ease, transform 0.15s ease;
+}
+.control-btn:hover {
+  background-color: var(--pp-500);
+  color: #ffffff;
+  transform: translateY(-2px);
+}
+.control-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+  background-color: #ffffff;
+  color: var(--pp-500);
+}
+.control-btn.is-active {
+  background-color: var(--pp-500);
+  color: #ffffff;
+}
+.control-btn.show-answer-btn {
+  border-color: var(--pp-700);
+  color: var(--pp-700);
+}
+.control-btn.show-answer-btn:hover {
+  background-color: var(--pp-700);
+  border-color: var(--pp-700);
+}
+
+.hint-panel {
+  width: 100%;
+  display: none;
+  background-color: var(--pp-100);
+  border-left: 4px solid var(--pp-500);
+  border-radius: 0 10px 10px 0;
+  padding: 14px 18px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--pp-700);
+}
+.hint-panel.is-open { display: block; }
+
+.answer-feedback {
+  width: 100%;
+  display: none;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 12px 16px;
+  border-radius: 10px;
+}
+.answer-feedback.is-open { display: block; }
+.answer-feedback.correct {
+  display: block;
+  background-color: #eafaf1;
+  color: var(--pp-correct);
+}
+.answer-feedback.incorrect {
+  display: block;
+  background-color: #fdecee;
+  color: var(--pp-incorrect);
+}
+
+/* ─── 8. PREV / NEXT FOOTER NAV (inline, not locked) ─── */
+.question-footer-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.footer-nav-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 22px;
+  border-radius: 26px;
+  border: none;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  background-color: var(--pp-500);
+  color: #ffffff;
+  box-shadow: 0 6px 18px rgba(168, 101, 181, 0.3);
+  transition: background-color 0.2s ease, transform 0.15s ease;
+}
+.footer-nav-btn:hover {
+  background-color: var(--pp-600);
+  transform: translateY(-2px);
+}
+.footer-nav-btn.secondary {
+  background-color: #ffffff;
+  color: var(--pp-500);
+  border: 2px solid var(--pp-500);
+  box-shadow: none;
+}
+.footer-nav-btn.secondary:hover {
+  background-color: var(--pp-100);
+}
+.footer-nav-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ─── 9. DESKTOP (≥1025px) — matches lesson.css breakpoint exactly ─── */
+@media (min-width: 1025px) {
+  .qnav-mobile-strip { display: none !important; }
+}
+
+/* ─── 10. MOBILE / TABLET (≤1024px) — independent layout ─── */
+@media (max-width: 1024px) {
+  .question-nav-panel { display: none !important; } /* swap for compact scroll-strip */
+
+  .qnav-mobile-strip {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    position: sticky;
+    top: 8px;
+    z-index: 20;
+    background-color: var(--pp-100);
+    border-radius: 14px;
+    padding: 10px 12px;
+  }
+
+  .qnav-mobile-strip .qnav-scroll {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    flex: 1;
+  }
+  .qnav-mobile-strip .qnav-scroll::-webkit-scrollbar { display: none; }
+
+  .qnav-mobile-strip .qnav-item {
+    flex-shrink: 0;
+    width: 40px;
+  }
+
+  .question-stage { padding: 22px; border-radius: 16px; gap: 18px; }
+  .question-prompt, .fillblank-prompt { font-size: 18px; }
+  .mcq-grid { grid-template-columns: 1fr; }
+  .match-columns { grid-template-columns: 1fr; gap: 16px; }
+  .question-footer-nav { position: sticky; bottom: 0; background: var(--sl-color-bg); padding-top: 10px; }
+}

@@ -1,0 +1,83 @@
+{
+  "meta": {
+    "courseTitle": "Introduction to Phonetics",
+    "topicPath": ["English", "Phonetics", "Vowel Sounds"],
+    "practiceTitle": "Vowel Sounds — Practice Set",
+    "coverImage": null
+  },
+  "questions": [
+    {
+      "id": "q1",
+      "type": "multiple-choice",
+      "prompt": "Which symbol represents the vowel sound in the word \"cat\"?",
+      "image": null,
+      "choices": ["/æ/", "/ɑː/", "/ɪ/", "/ʊ/"],
+      "answerIndex": 0,
+      "hint": "This is a short, open front vowel — think of how wide you open your mouth."
+    },
+    {
+      "id": "q2",
+      "type": "fill-blank",
+      "prompt": "The word \"see\" uses the {{blank1}} vowel, while \"sit\" uses the {{blank2}} vowel.",
+      "image": "/images/vowel-chart.png",
+      "blanks": {
+        "blank1": {
+          "options": ["/iː/", "/ɪ/", "/e/", "/æ/"],
+          "answer": "/iː/"
+        },
+        "blank2": {
+          "options": ["/iː/", "/ɪ/", "/e/", "/æ/"],
+          "answer": "/ɪ/"
+        }
+      },
+      "hint": "One is long and tense, the other is short and lax."
+    },
+    {
+      "id": "q3",
+      "type": "match-pairs",
+      "prompt": "Match each IPA symbol to the word that contains that sound.",
+      "image": null,
+      "pairs": [
+        { "left": "/ʌ/", "right": "cup" },
+        { "left": "/ɒ/", "right": "hot" },
+        { "left": "/ɜː/", "right": "bird" },
+        { "left": "/ɔː/", "right": "law" }
+      ],
+      "hint": "Say each word slowly and isolate the vowel sound in the middle."
+    },
+    {
+      "id": "q4",
+      "type": "multiple-choice",
+      "prompt": "Which of these is a diphthong (a vowel that glides between two sounds)?",
+      "image": null,
+      "choices": ["/iː/", "/aɪ/", "/e/", "/ʊ/"],
+      "answerIndex": 1,
+      "hint": null
+    },
+    {
+      "id": "q5",
+      "type": "fill-blank",
+      "prompt": "In British English, the word \"bath\" is typically pronounced with the {{blank1}} vowel.",
+      "image": null,
+      "blanks": {
+        "blank1": {
+          "options": ["/æ/", "/ɑː/", "/ʌ/", "/e/"],
+          "answer": "/ɑː/"
+        }
+      },
+      "hint": "This is the same long vowel as in \"car\" or \"father\"."
+    },
+    {
+      "id": "q6",
+      "type": "match-pairs",
+      "prompt": "Match each vowel description to its correct IPA symbol.",
+      "image": "/images/mouth-diagram.png",
+      "pairs": [
+        { "left": "Close front unrounded", "right": "/iː/" },
+        { "left": "Open back rounded", "right": "/ɒ/" },
+        { "left": "Mid central", "right": "/ə/" }
+      ],
+      "hint": "\"Close/open\" refers to jaw height, \"front/back\" to tongue position."
+    }
+  ]
+}
